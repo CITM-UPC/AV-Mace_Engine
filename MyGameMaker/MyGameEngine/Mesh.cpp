@@ -107,7 +107,7 @@ void Mesh::drawModel() const
 		getOwner()->GetComponent<Material>()->m_Shader->SetUniformBool("u_HasTexture", false);
 	}
 
-	getOwner()->GetComponent<Material>()->m_Shader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->_camera.projection() * (glm::mat4)Engine::Instance().scene->_camera.view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
+	getOwner()->GetComponent<Material>()->m_Shader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
 
 	glDrawElements(GL_TRIANGLES, model.get()->GetModelData().indexData.size(), GL_UNSIGNED_INT, nullptr);
 
@@ -194,7 +194,7 @@ void Mesh::draw() const {
 void Mesh::drawNormals() const
 {
 	m_NormalLinesShader->Bind();
-	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->_camera.projection() * (glm::mat4)Engine::Instance().scene->_camera.view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
+	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
 	m_NormalLinesShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// Enlaza el VBO de las líneas de normales
@@ -247,7 +247,7 @@ void Mesh::loadFaceNormalsToOpenGL()
 
 void Mesh::drawFaceNormals() const {
 	m_NormalLinesShader->Bind();
-	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->_camera.projection() * (glm::mat4)Engine::Instance().scene->_camera.view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
+	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
 	m_NormalLinesShader->SetUniform4f("u_Color", 0.0f, 0.0f, 1.0f, 1.0f);
 
 	// Enlaza el VBO de las líneas de normales por cara

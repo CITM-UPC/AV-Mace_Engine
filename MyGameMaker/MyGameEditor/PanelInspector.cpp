@@ -7,6 +7,7 @@
 #include "MyGameEngine/Transform.h"
 #include "MyGameEngine/Mesh.h"
 #include "MyGameEngine/Material.h"
+#include "MyGameEngine/Camera.h"
 
 #include "MyGameEngine/Log.h"
 
@@ -30,6 +31,7 @@ bool PanelInspector::Draw()
         if (selectedGameObject->GetComponent<Transform>()) DrawTransformControls(selectedGameObject);
         if (selectedGameObject->GetComponent<Mesh>()) DrawMeshControls(selectedGameObject);
         if (selectedGameObject->GetComponent<Material>()) DrawMaterialControls(selectedGameObject);
+		if (selectedGameObject->GetComponent<Camera>()) DrawCameraControls(selectedGameObject);
 		ImGui::Text(" ");
 
 		// Add Component
@@ -44,8 +46,9 @@ bool PanelInspector::Draw()
             {
 				bool isDisabled = false;
                 if (componentName == "Transform" && selectedGameObject->GetComponent<Transform>() != nullptr)    isDisabled = true;
-                else if (componentName == "Mesh" && selectedGameObject->GetComponent<Mesh>() != nullptr)         isDisabled = true;
+                //else if (componentName == "Mesh" && selectedGameObject->GetComponent<Mesh>() != nullptr)         isDisabled = true;
                 else if (componentName == "Material" && selectedGameObject->GetComponent<Material>() != nullptr) isDisabled = true;
+				else if (componentName == "Camera" && selectedGameObject->GetComponent<Camera>() != nullptr)     isDisabled = true;
 
                 if (isDisabled) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f)); // Dimmed text color
@@ -55,8 +58,9 @@ bool PanelInspector::Draw()
                 if (ImGui::Selectable(componentName.c_str(), false, isDisabled ? ImGuiSelectableFlags_Disabled : 0))
                 {
                     if (componentName == "Transform" && selectedGameObject->GetComponent<Transform>() == nullptr)       selectedGameObject->AddComponent<Transform>();
-					else if (componentName == "Mesh" && selectedGameObject->GetComponent<Mesh>() == nullptr)            selectedGameObject->AddComponent<Mesh>();
+					//else if (componentName == "Mesh" && selectedGameObject->GetComponent<Mesh>() == nullptr)            selectedGameObject->AddComponent<Mesh>();
 					else if (componentName == "Material" && selectedGameObject->GetComponent<Material>() == nullptr)    selectedGameObject->AddComponent<Material>();
+					else if (componentName == "Camera" && selectedGameObject->GetComponent<Camera>() == nullptr)        selectedGameObject->AddComponent<Camera>();
                 }
 
                 if (isDisabled) {
@@ -252,4 +256,55 @@ void PanelInspector::DrawMaterialControls(GameObject* gameObject)
         ImGui::Checkbox("Show Checkers", &showCheckers);
         ImGui::Separator();
     }
+}
+
+void PanelInspector::DrawCameraControls(GameObject* gameObject)
+{
+	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		auto* camera = gameObject->GetComponent<Camera>();
+
+		ImGui::Checkbox("Active", &camera->isActive());
+		ImGui::Text(" ");
+		ImGui::Text("Projection:");
+		ImGui::Text("Field of View");
+        ImGui::Text("       ");
+        ImGui::SameLine();
+        if (ImGui::SliderScalar("##fov", ImGuiDataType_Double, &camera->fov(), &min_value, &max_value, "%.2f"))
+        {
+            if (ImGui::IsItemActive()) {
+                Engine::Instance().input->ActivateTextInput();
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit()) {
+                Engine::Instance().input->ActivateTextInput(false);
+            }
+        }
+
+		ImGui::Text("Near Plane");
+        ImGui::Text("       ");
+		ImGui::SameLine();
+        if (ImGui::SliderScalar("##zNear", ImGuiDataType_Double, &camera->near(), &min_value, &max_value, "%.2f"))
+        {
+            if (ImGui::IsItemActive()) {
+                Engine::Instance().input->ActivateTextInput();
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit()) {
+                Engine::Instance().input->ActivateTextInput(false);
+            }
+        }
+
+		ImGui::Text("Far Plane");
+        ImGui::Text("       ");
+        ImGui::SameLine();
+        if (ImGui::SliderScalar("##zFar", ImGuiDataType_Double, &camera->far(), &min_value, &max_value, "%.2f"))
+        {
+            if (ImGui::IsItemActive()) {
+                Engine::Instance().input->ActivateTextInput();
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit()) {
+                Engine::Instance().input->ActivateTextInput(false);
+            }
+        }
+		ImGui::Separator();
+	}
 }

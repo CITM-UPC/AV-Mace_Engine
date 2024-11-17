@@ -13,57 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\UI">
-      <UniqueIdentifier>{6a604fd8-7627-4321-92a0-7c5a5c3d3ec7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\UI">
-      <UniqueIdentifier>{d06d5baa-9d16-4b91-99aa-14f97067fd25}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MyGUI.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelConfiguration.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelConsole.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelHierarchy.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelInspector.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelMenu.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGUI.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Panel.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PanelConfiguration.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PanelConsole.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PanelHierarchy.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PanelInspector.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PanelMenu.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

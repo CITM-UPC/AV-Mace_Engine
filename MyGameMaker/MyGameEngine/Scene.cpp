@@ -36,11 +36,9 @@ bool isZooming = false;
 void Scene::Start()
 {
 	// Init camera
-	_camera.transform().pos() = vec3(0, 3, 8);
-	_camera.transform().rotate(glm::radians(180.0), vec3(0, 1, 0));
-	_camera.transform().rotate(glm::radians(20.0), vec3(1, 0, 0));
+	InitCamera();
 
-    std::shared_ptr<GameObject> bakerHouse = CreateGameObject();
+    std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
 
 	ModelLoader modelLoader;
 	std::vector<std::shared_ptr<Model>> models;
@@ -66,10 +64,10 @@ void Scene::Update(double& dT)
 {
 	//camera speed
 	if (Engine::Instance().input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT) {
-		_camera.speed = 20.0f;
+		camera()->GetComponent<Camera>()->speed() = 20.0f;
 	}
 	else {
-		_camera.speed = 10.0f;
+		camera()->GetComponent<Camera>()->speed() = 10.0f;
 	}
 
 	//camera rotation
@@ -81,20 +79,20 @@ void Scene::Update(double& dT)
 		rightMouse = false;
 	}
 
-	if (rightMouse) {
-
+	if (rightMouse) 
+	{
 		//camera movement
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) {
-			_camera.transform().translate(vec3(0, 0, _camera.speed * dT));
+			camera()->GetComponent<Transform>()->translate(vec3(0, 0, camera()->GetComponent<Camera>()->speed() * dT));
 		}
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) {
-			_camera.transform().translate(vec3(_camera.speed * dT, 0, 0));
+			camera()->GetComponent<Transform>()->translate(vec3(camera()->GetComponent<Camera>()->speed() * dT, 0, 0));
 		}
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) {
-			_camera.transform().translate(vec3(0, 0, -_camera.speed * dT));
+			camera()->GetComponent<Transform>()->translate(vec3(0, 0, -camera()->GetComponent<Camera>()->speed() * dT));
 		}
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) {
-			_camera.transform().translate(vec3(-_camera.speed * dT, 0, 0));
+			camera()->GetComponent<Transform>()->translate(vec3(-camera()->GetComponent<Camera>()->speed() * dT, 0, 0));
 		}
 
 		Engine::Instance().input->GetMousePosition(mouseX, mouseY);
@@ -107,8 +105,8 @@ void Scene::Update(double& dT)
 		dx *= sensitivity;
 		dy *= sensitivity;
 
-		yaw = glm::degrees(atan2(_camera.transform().fwd().z, _camera.transform().fwd().x));
-		pitch = glm::degrees(atan2(_camera.transform().fwd().y, glm::sqrt(_camera.transform().fwd().x * _camera.transform().fwd().x + _camera.transform().fwd().z * _camera.transform().fwd().z)));
+		yaw = glm::degrees(atan2(camera()->GetComponent<Transform>()->fwd().z, camera()->GetComponent<Transform>()->fwd().x));
+		pitch = glm::degrees(atan2(camera()->GetComponent<Transform>()->fwd().y, glm::sqrt(camera()->GetComponent<Transform>()->fwd().x * camera()->GetComponent<Transform>()->fwd().x + camera()->GetComponent<Transform>()->fwd().z * camera()->GetComponent<Transform>()->fwd().z)));
 
 		yaw += dx;
 		pitch -= dy;
@@ -124,10 +122,10 @@ void Scene::Update(double& dT)
 		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
 		//actualizo el vector forward de la camera
-		_camera.transform().setFwd(glm::normalize(direction));
+		camera()->GetComponent<Transform>()->setFwd(glm::normalize(direction));
 		//uso vec3(0,1,0) porque busco el vector up en coordenadas world!!! igualmente acutalizo el vector up(local) de la camera
-		_camera.transform().setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), _camera.transform().fwd())));
-		_camera.transform().setUp(glm::normalize(glm::cross(_camera.transform().fwd(), _camera.transform().right())));
+		camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
+		camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
 
 		Engine::Instance().input->GetMousePosition(lastMouseX, lastMouseY);
 	}
@@ -146,16 +144,16 @@ void Scene::Update(double& dT)
 				fovModifier += 1.0;
 			}
 		}
-		_camera.fov = glm::radians(60 + fovModifier);
+		camera()->GetComponent<Camera>()->fov() = glm::radians(60 + fovModifier);
 	}
 
 	//camera focus
 	if (Engine::Instance().input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) {
 		if (selectedGameObject != nullptr) {
-			_camera.transform().pos() = selectedGameObject->GetComponent<Transform>()->pos() + vec3(0, 3, 8);
-			_camera.transform().setFwd(glm::normalize(selectedGameObject->GetComponent<Transform>()->pos() - _camera.transform().pos()));
-			_camera.transform().setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), _camera.transform().fwd())));
-			_camera.transform().setUp(glm::normalize(glm::cross(_camera.transform().fwd(), _camera.transform().right())));
+			camera()->GetComponent<Transform>()->pos() = selectedGameObject->GetComponent<Transform>()->glob_pos() + vec3(0, 3, 8);
+			camera()->GetComponent<Transform>()->setFwd(glm::normalize(selectedGameObject->GetComponent<Transform>()->glob_pos() - camera()->GetComponent<Transform>()->pos()));
+			camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
+			camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
 		}
 		else {
 			LOG(LogType::LOG_WARNING, "Select an Object!");
@@ -175,10 +173,10 @@ void Scene::Update(double& dT)
 		if (selectedGameObject != nullptr) 
 		{
 			Engine::Instance().input->GetMousePosition(mouseX, mouseY);
-			vec3 targetPos = selectedGameObject->GetComponent<Transform>()->pos();
+			vec3 targetPos = selectedGameObject->GetComponent<Transform>()->glob_pos();
 
 			// Calcular la distancia y offset inicial entre la cámara y el objeto
-			vec3 offset = _camera.transform().pos() - targetPos;
+			vec3 offset = camera()->GetComponent<Transform>()->pos() - targetPos;
 			float orbitDistance = glm::length(offset);
 
 			// Calcular ángulos iniciales de la cámara
@@ -203,12 +201,12 @@ void Scene::Update(double& dT)
 			offset.y = orbitDistance * sin(verticalAngle);
 			offset.z = orbitDistance * cos(verticalAngle) * cos(horizontalAngle);
 
-			_camera.transform().pos() = targetPos + offset;
+			camera()->GetComponent<Transform>()->pos() = targetPos + offset;
 
 			// Actualizar la dirección de la cámara para que mire al objeto
-			_camera.transform().setFwd(glm::normalize(targetPos - _camera.transform().pos()));
-			_camera.transform().setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), _camera.transform().fwd())));
-			_camera.transform().setUp(glm::normalize(glm::cross(_camera.transform().fwd(), _camera.transform().right())));
+			camera()->GetComponent<Transform>()->setFwd(glm::normalize(targetPos - camera()->GetComponent<Transform>()->pos()));
+			camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
+			camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
 
 			Engine::Instance().input->GetMousePosition(lastMouseX, lastMouseY);
 		}
@@ -278,18 +276,26 @@ void Scene::loadTextureByPath(const std::string& path)
 	}
 }
 
-std::shared_ptr<GameObject> Scene::CreateGameObject()
+std::shared_ptr<GameObject> Scene::CreateGameObject(const std::string& name)
 {
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::EMPTY, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>("GameObject");
+	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(name.c_str());
 	go->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
 
 	if (selectedGameObject == nullptr) root()->addChild(go);
 	else selectedGameObject->addChild(go);
 
 	return go;
+}
+
+void Scene::InitCamera()
+{
+	_camera.AddComponent<Camera>();
+	_camera.GetComponent<Transform>()->translate(vec3(0, 3, 8));
+	_camera.GetComponent<Transform>()->rotate(glm::radians(180.0), vec3(0, 1, 0));
+	_camera.GetComponent<Transform>()->rotate(glm::radians(20.0), vec3(1, 0, 0));
 }
 
 void Scene::CreateCube()

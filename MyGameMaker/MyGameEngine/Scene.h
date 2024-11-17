@@ -14,13 +14,14 @@ class Scene
 	std::string _name;
 	bool _active;
 	GameObject* _root = new GameObject("SceneRoot");
+	GameObject _camera = GameObject("EditorCamera", "Camera");
 
 public:
-	Scene(const std::string& name, const std::string& tag = "Untagged", bool active = true) : _name(name), _active(active) {}
+	Scene(const std::string& name, bool active = true) : _name(name), _active(active) {}
 	~Scene() {}
 
-	Camera _camera;
     GameObject* root() { return _root; }
+	GameObject* camera() { return &_camera; }
 
 	void Start();
 	void Update(double& dT);
@@ -34,7 +35,8 @@ public:
 
 	GameObject* selectedGameObject = nullptr;
 
-	std::shared_ptr<GameObject> CreateGameObject();
+	std::shared_ptr<GameObject> CreateGameObject(const std::string& name = "GameObject");
+	void InitCamera();
 	void CreateCube();
 	void CreatePlane();
 	void CreateSphere();

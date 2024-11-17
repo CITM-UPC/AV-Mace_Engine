@@ -59,7 +59,7 @@ void Engine::PostUpdate()
 
     //draw floor grid
     glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixd(&scene->_camera.view()[0][0]);
+    glLoadMatrixd(&scene->camera()->GetComponent<Camera>()->view()[0][0]);
 
 
     //draw things
@@ -67,9 +67,9 @@ void Engine::PostUpdate()
     scene->Draw(scene->root());
 
     glViewport(0, 0, window->width(), window->height());
-    scene->_camera.aspect = static_cast<double>(window->width()) / window->height();
+    scene->camera()->GetComponent<Camera>()->aspect() = static_cast<double>(window->width()) / window->height();
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixd(&scene->_camera.projection()[0][0]);
+    glLoadMatrixd(&scene->camera()->GetComponent<Camera>()->projection()[0][0]);
 }
 
 void Engine::CleanUp()

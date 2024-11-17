@@ -23,23 +23,27 @@ public:
 	void DrawTransformControls(GameObject* gameObject);
 	void DrawMeshControls(GameObject* gameObject);
 	void DrawMaterialControls(GameObject* gameObject);
+	void DrawCameraControls(GameObject* gameObject);
 
 private:
 	// Tag options
-	std::vector<std::string> tagOptions = { "Untagged", "Player", "Other" };
+	std::vector<std::string> tagOptions = { "Untagged", "Player", "Camera", "Other" };
 
 	// Layer options
 	std::string _currentLayer = "Default";
 	std::vector<std::string> layers = { "Default", "TransparentFX", "Ignore Raycast", "Water", "UI", "PostProcessing" };
 
 	// Component options
-	std::vector<std::string> componentOptions = { "Transform", "Mesh", "Material"};
+	std::vector<std::string> componentOptions = { "Transform", "Mesh", "Material", "Camera"};
 
 	bool showPerTriangleNormals = false;
 	bool showPerFaceNormals = false;
 	bool showCheckers = false;
 	bool showWireframe = false;
 	bool uniformScale = false;
+
+	double min_value = 1.0f;
+	double max_value = 179.0f;
 };
 
 #endif // !__PANEL_INSPECTOR_H__
