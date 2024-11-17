@@ -36,6 +36,7 @@ private:
 	// Component options
 	std::vector<std::string> componentOptions = { "Transform", "Mesh", "Material", "Camera"};
 
+	bool showComponent = false;
 	bool showPerTriangleNormals = false;
 	bool showPerFaceNormals = false;
 	bool showCheckers = false;
