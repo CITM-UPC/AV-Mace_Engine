@@ -22,6 +22,33 @@ namespace Colors {
 	const glm::u8vec3 Blue( 0, 0, 255);
 };
 
+
+// ALGEBRA STRUCTS ----------------------------------------------------------------
+struct Point { 
+	vec3 p;
+	Point(const vec3& p) : p(p) {}
+};
+struct Vector { 
+	vec3 v; 
+	Vector(const vec3& v) : v(v) {}
+};
+struct Plane { 
+	Point origin; 
+	Vector normal; 
+	Plane(const Point& origin, const Vector& normal) : origin(origin), normal(normal) {}
+};
+
+inline Point operator*(const mat4& mat, const Point& point) {
+	vec4 v4 = mat * vec4(point.p, 1.0);
+	return Point(vec3(v4) / v4.w);
+}
+inline Vector operator*(const mat4& mat, const Vector& vec) { 
+	return Vector(vec3(mat * vec4(vec.v, 0.0)));
+}
+inline Plane operator*(const mat4& mat, const Plane& plane) {
+	return Plane(mat * plane.origin, mat * plane.normal);
+}
+
 // TYPEDEFS ----------------------------------------------------------------------
 typedef unsigned int uint;
 typedef unsigned long ulong;

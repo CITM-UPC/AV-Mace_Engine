@@ -69,8 +69,6 @@ public:
 	void setFwd(const vec3& fwd) { _fwd = fwd; }
 	void setRigth(const vec3& left) { _left = left; }
 	void setUp(const vec3& up) { _up = up; }
-    void SwitchState() override { SetActive(!isActive()); }
-	bool SetActive(bool active) override { return Component::SetActive(active); }
 	void makeDirty() { isDirty = true; }
 
 	Transform() = default;

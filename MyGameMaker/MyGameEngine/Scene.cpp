@@ -324,6 +324,7 @@ void Scene::CreatePlane()
 	modelLoader.load(Shapes::PLANE, model);
 	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
 	go->GetComponent<Transform>()->pos() = vec3(-5, 0, 0);
+	go->GetComponent<Transform>()->updateGlobalMatrix();
 	go->AddComponent<Mesh>();
 	go->GetComponent<Mesh>()->setModel(model);
 	go->GetComponent<Mesh>()->loadToOpenGL();
@@ -341,6 +342,7 @@ void Scene::CreateSphere()
 	modelLoader.load(Shapes::SPHERE, model);
 	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
 	go->GetComponent<Transform>()->pos() = vec3(10, 0, -5);
+	go->GetComponent<Transform>()->updateGlobalMatrix();
 	go->AddComponent<Mesh>();
 	go->GetComponent<Mesh>()->setModel(model);
 	go->GetComponent<Mesh>()->loadToOpenGL();
@@ -358,6 +360,7 @@ void Scene::CreateCylinder()
 	modelLoader.load(Shapes::CYLINDER, model);
 	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
 	go->GetComponent<Transform>()->pos() = vec3(-5, 0, -5);
+	go->GetComponent<Transform>()->updateGlobalMatrix();
 	go->AddComponent<Mesh>();
 	go->GetComponent<Mesh>()->setModel(model);
 	go->GetComponent<Mesh>()->loadToOpenGL();
@@ -375,6 +378,7 @@ void Scene::CreateCone()
 	modelLoader.load(Shapes::CONE, model);
 	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
 	go->GetComponent<Transform>()->pos() = vec3(0, 0, -5);
+	go->GetComponent<Transform>()->updateGlobalMatrix();
 	go->AddComponent<Mesh>();
 	go->GetComponent<Mesh>()->setModel(model);
 	go->GetComponent<Mesh>()->loadToOpenGL();
@@ -392,6 +396,7 @@ void Scene::CreateTorus()
 	modelLoader.load(Shapes::TORUS, model);
 	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
 	go->GetComponent<Transform>()->pos() = vec3(5, 0, -5);
+	go->GetComponent<Transform>()->updateGlobalMatrix();
 	go->AddComponent<Mesh>();
 	go->GetComponent<Mesh>()->setModel(model);
 	go->GetComponent<Mesh>()->loadToOpenGL();
