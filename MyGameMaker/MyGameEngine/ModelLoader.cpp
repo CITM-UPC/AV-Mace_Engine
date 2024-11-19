@@ -1,27 +1,29 @@
 #include "ModelLoader.h"
 
-#include <assimp/Importer.hpp>      
-#include <assimp/scene.h>           
+#include <assimp/cimport.h>    
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>         
+#include <assimp/mesh.h>
 
-#include <iostream>
+#include "Log.h"
 
 void ModelLoader::load(const std::string& filename, std::vector<std::shared_ptr<Model>>& models) const
 {
-	Assimp::Importer importer;
-
 	// And have it read the given file with some example postprocessing
 	// Usually - if speed is not the most important aspect for you - you'll
 	// probably to request more postprocessing than we do in this example.
-	const aiScene* scene = importer.ReadFile(filename,
+	const aiScene* scene = aiImportFile(filename.c_str(),
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
-		aiProcess_SortByPType);
+		aiProcess_SortByPType |
+		aiProcess_GenUVCoords | 
+		aiProcess_TransformUVCoords | 
+		aiProcess_FlipUVs);
 
 	// If the import failed, report it
 	if (nullptr == scene) {
-		std::cout << importer.GetErrorString() << std::endl;
+		LOG(LogType::LOG_WARNING, "Couldn't find %s", filename.c_str());
 	}
 	else {
 		models.resize(scene->mNumMeshes);
@@ -46,7 +48,7 @@ void ModelLoader::load(const std::string& filename, std::vector<std::shared_ptr<
 				if (mesh->mTextureCoords[0]) {  // Comprueba si hay UVs
 					aiVector3D uv = mesh->mTextureCoords[0][j];
 					aux.x = uv.x;  // Solo X y Y
-					aux.y = 1.0f - uv.y;
+					aux.y = uv.y;
 				}
 				modelsData[i]->vertex_texCoords.push_back(aux);
 
@@ -341,4 +343,81 @@ void ModelLoader::load(Shapes shape, std::shared_ptr<Model>& model)
 	}
 
 	model->SetModelData(*modelData);
+}
+
+static void createMeshesFromFBX(const aiScene& scene, std::vector<std::shared_ptr<Model>>& models) {
+	
+	models.resize(scene.mNumMeshes);
+
+	std::vector<std::shared_ptr<ModelData>> modelsData;
+	modelsData.resize(scene.mNumMeshes);
+
+	for (unsigned int i = 0; i < scene.mNumMeshes; i++) {
+		aiMesh* mesh = scene.mMeshes[i];
+		modelsData[i] = std::make_shared<ModelData>();
+		models[i] = std::make_shared<Model>();
+		models[i]->SetMeshName(mesh->mName.C_Str());
+
+		for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+
+			// Coordenadas de los vértices
+			aiVector3D vertex = mesh->mVertices[j];
+			vec3 aux = vec3(vertex.x, vertex.y, vertex.z);
+			modelsData[i]->vertexData.push_back(aux);
+
+			// Coordenadas UV (si existen)
+			if (mesh->mTextureCoords[0]) {  // Comprueba si hay UVs
+				aiVector3D uv = mesh->mTextureCoords[0][j];
+				aux.x = uv.x;  // Solo X y Y
+				aux.y = uv.y;
+			}
+			modelsData[i]->vertex_texCoords.push_back(aux);
+
+			if (mesh->HasNormals()) {  // Verifica si hay normales
+				aiVector3D normal = mesh->mNormals[j];
+				vec3 auxNormal(normal.x, normal.y, normal.z);
+				modelsData[i]->vertex_normals.push_back(auxNormal);
+			}
+
+			if (mesh->HasVertexColors(0)) {  // Verifica si hay colores
+				aiColor4D color = mesh->mColors[0][j];
+				vec3 auxColor(color.r, color.g, color.b);
+				modelsData[i]->vertex_colors.push_back(auxColor);
+			}
+
+		}
+
+		for (unsigned int j = 0; j < mesh->mNumFaces; j++) {
+			aiFace face = mesh->mFaces[j];
+			for (unsigned int k = 0; k < face.mNumIndices; k++) {
+				modelsData[i]->indexData.push_back(face.mIndices[k]);
+			}
+		}
+
+		models[i]->SetModelData(*modelsData[i]);
+
+	}
+}
+
+GameObject* ModelLoader::loadFromFile(const std::string& filename)
+{
+	const aiScene* scene = aiImportFile(filename.c_str(),
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_SortByPType |
+		aiProcess_GenUVCoords |
+		aiProcess_TransformUVCoords |
+		aiProcess_FlipUVs);
+
+	// If the import failed, report it
+	if (nullptr == scene) {
+		LOG(LogType::LOG_WARNING, "Couldn't find %s", filename.c_str());
+		return nullptr;
+	}
+	else {
+		std::vector<std::shared_ptr<Model>> models;
+		createMeshesFromFBX(*scene, models);
+	}
+	return nullptr;
 }
