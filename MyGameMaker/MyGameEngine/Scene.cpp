@@ -38,9 +38,10 @@ void Scene::Start()
 	// Init camera
 	InitCamera();
 
-    std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
+	std::shared_ptr<GameObject> scene = ModelLoader::loadFromFile("Assets/FBX/BakerHouse.fbx");
+	root()->addChild(scene);
 
-	ModelLoader modelLoader;
+	/*ModelLoader modelLoader;
 	std::vector<std::shared_ptr<Model>> models;
 	modelLoader.load("Assets/FBX/BakerHouse.fbx", models);
 	for (size_t i = 0; i < models.size(); i++)
@@ -57,7 +58,7 @@ void Scene::Start()
 		go->GetComponent<Material>()->m_Texture = std::make_unique<Texture>("Assets/Textures/Baker_house.png");
 		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 		go->GetComponent<Mesh>()->loadToOpenGL();
-	}
+	}*/
 }
 
 void Scene::Update(double& dT)
@@ -247,7 +248,7 @@ void Scene::Draw(GameObject* root)
 
 void Scene::loadGameObjectByPath(const std::string& path)
 {
-	ModelLoader modelLoader;
+	/*ModelLoader modelLoader;
 	std::vector<std::shared_ptr<Model>> models;
 	modelLoader.load(path, models);
 	for (size_t i = 0; i < models.size(); i++)
@@ -261,7 +262,10 @@ void Scene::loadGameObjectByPath(const std::string& path)
 		go->AddComponent<Material>();
 		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 		root()->addChild(go);
-	}
+	}*/
+
+	std::shared_ptr<GameObject> scene = ModelLoader::loadFromFile(path);
+	root()->addChild(scene);
 
 	LOG(LogType::LOG_INFO, "Model loaded successfully!");
 }

@@ -40,8 +40,13 @@ public:
 	void SetMeshName(const std::string& meshName) { this->meshName = meshName; }
 
 	void SetModelData(const ModelData& modelData) { this->modelData = modelData; }
+
+	void SetMaterialIndex(int index) { materialIndex = index; }
+
+	int& GetMaterialIndex() { return materialIndex; }
 private:
 	std::string meshName;
 	ModelData modelData;
+	int materialIndex = -1;
 };
 

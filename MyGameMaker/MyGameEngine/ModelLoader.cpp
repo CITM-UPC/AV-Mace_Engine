@@ -4,6 +4,13 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>         
 #include <assimp/mesh.h>
+#include <filesystem>
+#include <memory>
+
+#include "Texture.h"
+#include "Material.h"
+#include "Transform.h"
+#include "Mesh.h"
 
 #include "Log.h"
 
@@ -357,6 +364,7 @@ static void createMeshesFromFBX(const aiScene& scene, std::vector<std::shared_pt
 		modelsData[i] = std::make_shared<ModelData>();
 		models[i] = std::make_shared<Model>();
 		models[i]->SetMeshName(mesh->mName.C_Str());
+		models[i]->SetMaterialIndex(mesh->mMaterialIndex);
 
 		for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
 
@@ -399,7 +407,68 @@ static void createMeshesFromFBX(const aiScene& scene, std::vector<std::shared_pt
 	}
 }
 
-GameObject* ModelLoader::loadFromFile(const std::string& filename)
+static void createMaterialsFromFBX(const aiScene& scene, const std::filesystem::path& basePath, std::vector<std::shared_ptr<Material>>& materials) {
+
+	materials.resize(scene.mNumMaterials);
+
+	for (unsigned int i = 0; i < scene.mNumMaterials; ++i) {
+		const auto* fbx_material = scene.mMaterials[i];
+		materials[i] = std::make_shared<Material>();
+
+		if (fbx_material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+			aiString texturePath;
+			fbx_material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+			const string textureFileName = std::filesystem::path(texturePath.C_Str()).filename().string();
+			materials[i]->m_TexturePath = (basePath / textureFileName).string();
+
+			auto uWrapMode = aiTextureMapMode_Wrap;
+			auto vWrapMode = aiTextureMapMode_Wrap;
+			fbx_material->Get(AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0), uWrapMode);
+			fbx_material->Get(AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0), vWrapMode);
+			assert(uWrapMode == aiTextureMapMode_Wrap);
+			assert(vWrapMode == aiTextureMapMode_Wrap);
+
+			unsigned int flags = 0;
+			fbx_material->Get(AI_MATKEY_TEXFLAGS_DIFFUSE(0), flags);
+			assert(flags == 0);
+		}
+	}
+}
+
+static mat4 aiMat4ToMat4(const aiMatrix4x4& aiMat) {
+	mat4 mat;
+	for (int c = 0; c < 4; ++c) for (int r = 0; r < 4; ++r) mat[c][r] = aiMat[r][c];
+	return mat;
+}
+
+std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<shared_ptr<Material>>& materials) {
+	
+	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>("scene.mName.C_Str()");
+
+	obj->GetComponent<Transform>()->mat() = aiMat4ToMat4(node.mTransformation);
+	//obj->GetComponent<Transform>()->updateGlobalMatrix();
+
+	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
+		const auto meshIndex = node.mMeshes[i];
+		const auto materialIndex = meshes[meshIndex].get()->GetMaterialIndex();
+		obj->name() = meshes[meshIndex].get()->GetMeshName();
+		obj->AddComponent<Mesh>();
+		obj->GetComponent<Mesh>()->setModel(meshes[meshIndex]);
+		obj->AddComponent<Material>();
+		obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[materialIndex]->m_TexturePath);
+		obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+		obj->GetComponent<Mesh>()->loadToOpenGL();
+	}
+
+	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
+		std::cout << i << std::endl;
+		obj->addChild(graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials));
+	}
+
+	return obj;
+}
+
+std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filename)
 {
 	const aiScene* scene = aiImportFile(filename.c_str(),
 		aiProcess_CalcTangentSpace |
@@ -418,6 +487,11 @@ GameObject* ModelLoader::loadFromFile(const std::string& filename)
 	else {
 		std::vector<std::shared_ptr<Model>> models;
 		createMeshesFromFBX(*scene, models);
+		std::vector<std::shared_ptr<Material>> materials;
+		createMaterialsFromFBX(*scene, std::filesystem::absolute(filename).parent_path(), materials);
+		std::shared_ptr<GameObject> fbx_obj = graphicObjectFromNode(*scene, *scene->mRootNode, models, materials);
+		aiReleaseImport(scene);
+		fbx_obj->name() = std::filesystem::path(filename).stem().string();
+		return fbx_obj;
 	}
-	return nullptr;
 }

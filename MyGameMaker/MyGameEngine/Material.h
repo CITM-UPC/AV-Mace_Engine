@@ -13,8 +13,10 @@ class Material :  public Component
 {
 public:
 	Material(bool active, GameObject* owner) : Component(active, owner) {}
+	Material() = default;
 	std::unique_ptr<Texture> m_Texture;
 	std::unique_ptr<Shader> m_Shader;
+	string m_TexturePath;
 };
 
 #endif // !__MATERIAL_H__

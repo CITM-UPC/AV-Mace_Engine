@@ -33,6 +33,7 @@ class Transform : public Component
 public:
 	// Local Transform
 	const mat4 mat() const { return local_mat; }
+	mat4 &mat() { return local_mat; }
 	const vec3 left() const { return _left; }
 	const vec3 right() const { return _left; }
 	const vec3 up() const { return _up; }
