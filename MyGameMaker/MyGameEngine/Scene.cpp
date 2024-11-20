@@ -266,6 +266,7 @@ void Scene::loadGameObjectByPath(const std::string& path)
 
 	std::shared_ptr<GameObject> scene = ModelLoader::loadFromFile(path);
 	root()->addChild(scene);
+	scene->GetComponent<Transform>()->updateGlobalMatrix();
 
 	LOG(LogType::LOG_INFO, "Model loaded successfully!");
 }

@@ -11,6 +11,8 @@
 #include "Material.h"
 #include "Transform.h"
 #include "Mesh.h"
+#include "Scene.h"
+#include "Engine.h"
 
 #include "Log.h"
 
