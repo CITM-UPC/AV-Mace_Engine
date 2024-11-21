@@ -12,7 +12,7 @@
 #include "ModelLoader.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "debugDraws.h"
+#include "Debug.h"
 
 //camera movement variables
 bool rightMouse = false;

@@ -1,7 +1,9 @@
-#include "debugDraws.h"
+#include "Debug.h"
 #include "GameObject.h"
 #include "Transform.h"
 #include <GL/glew.h>
+#include <imgui.h>
+#include <imguizmo.h>
 
 inline static void glVertex3(const vec3& v) { glVertex3dv(&v.x); }
 
