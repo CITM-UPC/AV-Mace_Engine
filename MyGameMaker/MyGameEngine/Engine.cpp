@@ -4,7 +4,7 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Scene.h"
-#include "debugDraws.h"
+#include "Debug.h"
 
 //devil
 #include <IL/il.h>
