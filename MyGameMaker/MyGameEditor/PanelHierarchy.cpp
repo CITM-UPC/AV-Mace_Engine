@@ -8,8 +8,9 @@
 #include "MyGameEngine/Scene.h"
 #include "MyGameEngine/types.h"
 #include "PanelInspector.h"
+#include "MyGameEngine/Log.h"
 
-PanelHierarchy::PanelHierarchy(std::string name) : Panel(name, WINDOW_WIDTH * 0.1, WINDOW_HEIGHT - 219)
+PanelHierarchy::PanelHierarchy(std::string name) : Panel(name, WINDOW_WIDTH * 0.15, WINDOW_HEIGHT - 219)
 {
 	SwitchState();
 }
@@ -30,6 +31,40 @@ bool PanelHierarchy::Draw()
    for (const std::shared_ptr<GameObject>& gameObjectPtr : Engine::Instance().scene->root()->children()) {
 	   DrawGameObjectTree(gameObjectPtr.get());
    }
+
+   if (ImGui::IsMouseClicked(3) && ImGui::IsWindowHovered()) {
+       ImGui::OpenPopup("CreateGameObjectPopup");
+       LOG(LogType::LOG_INFO, "Open Popup");
+   }
+
+   // Create GameObjects Popup
+   if (ImGui::BeginPopup("CreateGameObjectPopup"))
+   {
+       LOG(LogType::LOG_INFO, "Popup Called");
+       ImGui::Selectable("Cut", false);
+       ImGui::Selectable("Copy", false);
+       ImGui::Selectable("Paste", false);
+       ImGui::Selectable("Paste As Child", false);
+       ImGui::Separator();
+       ImGui::Selectable("Rename", "F2", false);
+       ImGui::Selectable("Duplicate", "Ctrl+D", false);
+       ImGui::Selectable("Delete", "Del", false);
+       ImGui::Separator();
+       ImGui::Selectable("Select Children", false);
+       ImGui::Separator();
+       ImGui::Selectable("Create Empty", false);
+       if (ImGui::BeginMenu("Primitives")) {
+           // Add items here
+           ImGui::EndMenu();
+       }
+
+       if (ImGui::BeginMenu("Material")) {
+           // Add items here
+           ImGui::EndMenu();
+       }
+       ImGui::EndPopup();
+   }
+
    ImGui::End();
 
    if (!showWindow) {

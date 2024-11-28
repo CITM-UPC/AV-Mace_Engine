@@ -28,10 +28,10 @@ bool PanelInspector::Draw()
         ImGui::Begin("Inspector", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
         DrawGameObjectControls(selectedGameObject);
-        if (selectedGameObject->HasComponent<Transform>()) DrawTransformControls(selectedGameObject);
-        if (selectedGameObject->HasComponent<Mesh>()) DrawMeshControls(selectedGameObject);
-        if (selectedGameObject->HasComponent<Material>()) DrawMaterialControls(selectedGameObject);
-		if (selectedGameObject->HasComponent<Camera>()) DrawCameraControls(selectedGameObject);
+        if (selectedGameObject->HasComponent<Transform>())  DrawTransformControls(selectedGameObject);
+        if (selectedGameObject->HasComponent<Mesh>())       DrawMeshControls(selectedGameObject);
+        if (selectedGameObject->HasComponent<Material>())   DrawMaterialControls(selectedGameObject);
+		if (selectedGameObject->HasComponent<Camera>())     DrawCameraControls(selectedGameObject);
 		ImGui::Text(" ");
 
 		// Add Component

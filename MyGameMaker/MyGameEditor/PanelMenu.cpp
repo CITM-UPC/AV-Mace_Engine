@@ -150,7 +150,7 @@ bool PanelMenu::Draw()
         // GameObjects menu
         if (ImGui::BeginMenu("GameObjects")) 
         {
-            if (ImGui::BeginMenu("Create..."))
+            if (ImGui::BeginMenu("Primitives..."))
             {
                 if (ImGui::MenuItem("Create Empty", nullptr, nullptr)) {
 					Engine::Instance().scene->CreateGameObject();
@@ -182,6 +182,13 @@ bool PanelMenu::Draw()
 					Engine::Instance().scene->CreateTorus();
                 }
                 ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("3D Objects..."))
+            {
+                if (ImGui::MenuItem("Create Camera", nullptr, nullptr)) {
+                    //Engine::Instance().scene->CreateCamera();
+                }
             }
 			
             if (ImGui::BeginMenu("Draw Mode")) {

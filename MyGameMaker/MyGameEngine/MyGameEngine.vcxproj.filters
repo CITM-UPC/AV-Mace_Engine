@@ -96,6 +96,9 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files\GameObject\Components</Filter>
     </ClInclude>
+    <ClInclude Include="PolymorphList.h">
+      <Filter>Header Files\GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp">
