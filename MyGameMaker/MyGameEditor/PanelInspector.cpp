@@ -57,10 +57,10 @@ bool PanelInspector::Draw()
 
                 if (ImGui::Selectable(componentName.c_str(), false, isDisabled ? ImGuiSelectableFlags_Disabled : 0))
                 {
-                    if (componentName == "Transform" && selectedGameObject->HasComponent<Transform>())       selectedGameObject->AddComponent<Transform>();
+                    if (componentName == "Transform" && !selectedGameObject->HasComponent<Transform>())       selectedGameObject->AddComponent<Transform>();
 					//else if (componentName == "Mesh" && selectedGameObject->HasComponent<Mesh>())            selectedGameObject->AddComponent<Mesh>();
-					else if (componentName == "Material" && selectedGameObject->HasComponent<Material>())    selectedGameObject->AddComponent<Material>();
-					else if (componentName == "Camera" && selectedGameObject->HasComponent<Camera>())        selectedGameObject->AddComponent<Camera>();
+					else if (componentName == "Material" && !selectedGameObject->HasComponent<Material>())    selectedGameObject->AddComponent<Material>();
+					else if (componentName == "Camera" && !selectedGameObject->HasComponent<Camera>())        selectedGameObject->AddComponent<Camera>();
                 }
 
                 if (isDisabled) {
