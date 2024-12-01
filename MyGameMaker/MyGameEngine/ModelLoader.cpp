@@ -444,11 +444,11 @@ static mat4 aiMat4ToMat4(const aiMatrix4x4& aiMat) {
 }
 
 std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<shared_ptr<Material>>& materials) {
-	
+
 	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>("scene.mName.C_Str()");
 
 	obj->GetComponent<Transform>()->mat() = aiMat4ToMat4(node.mTransformation);
-	//obj->GetComponent<Transform>()->updateGlobalMatrix();
+	obj->GetComponent<Transform>()->updateGlobalMatrix();
 
 	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
 		const auto meshIndex = node.mMeshes[i];
@@ -463,7 +463,6 @@ std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const ai
 	}
 
 	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-		std::cout << i << std::endl;
 		obj->addChild(graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials));
 	}
 

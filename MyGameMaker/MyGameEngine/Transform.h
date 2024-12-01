@@ -42,6 +42,7 @@ public:
 	
 	// Global Transfrom
 	const mat4 glob_mat() const { return global_mat; }
+	mat4 &glob_mat() { return global_mat; }
 	const vec3 glob_left() const { return global_left; }
 	const vec3 glob_right() const { return global_left; }
 	const vec3 glob_up() const { return global_up; }

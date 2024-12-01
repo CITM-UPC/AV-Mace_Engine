@@ -49,7 +49,8 @@ void Transform::updateGlobalMatrix()
 
         if (current->isDirty) 
         {
-            if (current->getOwner()->parent().hasParent()) {
+            //current->getOwner()->parent().hasParent()
+            if (current->getOwner()->hasParent()) {
                 current->global_mat = current->getOwner()->parent().GetComponent<Transform>()->glob_mat() * current->local_mat;
             }
             else {

@@ -38,10 +38,12 @@ void Scene::Start()
 	// Init camera
 	InitCamera();
 
-	std::shared_ptr<GameObject> scene = ModelLoader::loadFromFile("Assets/FBX/BakerHouse.fbx");
-	root()->addChild(scene);
+	std::shared_ptr<GameObject> sceneobj = ModelLoader::loadFromFile("Assets/FBX/BakerHouse.fbx");
+	root()->addChild(sceneobj);
 
-	/*ModelLoader modelLoader;
+	/*std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
+
+	ModelLoader modelLoader;
 	std::vector<std::shared_ptr<Model>> models;
 	modelLoader.load("Assets/FBX/BakerHouse.fbx", models);
 	for (size_t i = 0; i < models.size(); i++)
