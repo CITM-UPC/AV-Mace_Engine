@@ -11,6 +11,9 @@ m_Width(0), m_Height(0), m_BPP(0)
 	auto il_img_id = ilGenImage();
 	ilLoadImage((const wchar_t*)path.c_str());
 
+	const auto origin = ilGetInteger(IL_IMAGE_ORIGIN);
+	if (origin != IL_ORIGIN_UPPER_LEFT) iluFlipImage();
+
 	GLCall(glGenTextures(1, &m_RendererID));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
 
