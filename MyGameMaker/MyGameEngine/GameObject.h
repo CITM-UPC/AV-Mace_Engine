@@ -6,6 +6,7 @@
 #include <vector>
 #include "TreeExtension.h"
 #include "Component.h"
+#include "BoundingBox.h"
 
 class Component;
 
@@ -15,6 +16,8 @@ class GameObject : public TreeExtension<GameObject>
 	std::string _tag;
 	bool _active;
 	std::vector<Component*> _components;
+
+	BoundingBox _boundingBox;
 
 public:
 	GameObject(const std::string& name, const std::string& tag = "Untagged", bool active = true);
@@ -56,6 +59,10 @@ public:
 	}
 
 	bool operator==(const GameObject& other) const;
+
+	// Métodos para la Bounding Box
+	const BoundingBox& getBoundingBox() const;
+	void setBoundingBox(const BoundingBox& bbox) { _boundingBox = bbox; }
 
 protected:
 	virtual void Start() {}

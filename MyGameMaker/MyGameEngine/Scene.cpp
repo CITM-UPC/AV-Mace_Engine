@@ -40,8 +40,9 @@ void Scene::Start()
 	// Init camera
 	InitCamera();
 
-	std::shared_ptr<GameObject> sceneobj = ModelLoader::loadFromFile("Assets/FBX/BakerHouse.fbx");
+	std::shared_ptr<GameObject> sceneobj = ModelLoader::loadFromFile("Assets/BakerHouse.fbx");
 	root()->addChild(sceneobj);
+	root()->GetComponent<Transform>()->updateGlobalMatrix();
 
 	/*std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
 
@@ -243,11 +244,15 @@ void Scene::Draw(GameObject* root)
 		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
 			glm::dmat4 projectionMatrix = camera()->GetComponent<Camera>()->projection();
 			Frustum frustum;
-			BoundingBox boundingBox = child->GetComponent<Mesh>()->boundingBox();
-
-			if (frustum.isBoundingBoxInFrustum(boundingBox)) {
+			BoundingBox boundingBox = child->getBoundingBox();
+			child->GetComponent<Mesh>()->drawModel();
+			//frustum.setFrustumPlanes(projectionMatrix);
+			/*if (frustum.isBoundingBoxInFrustum(boundingBox)) {
 				child->GetComponent<Mesh>()->drawModel();
 			}
+			else {
+				printf("Object out of frustum\n");
+			}*/
 		}
 
 		if (!child->children().empty()) Draw(child.get());

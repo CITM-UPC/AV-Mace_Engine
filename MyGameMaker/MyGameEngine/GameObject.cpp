@@ -29,3 +29,8 @@ bool GameObject::operator==(const GameObject& other) const
 
 	return true;
 }
+
+const BoundingBox& GameObject::getBoundingBox() const
+{
+	return GetComponent<Transform>()->mat() * _boundingBox;
+}

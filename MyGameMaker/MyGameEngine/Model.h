@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include "BoundingBox.h"
 
 #include "types.h"
 
@@ -39,14 +40,23 @@ public:
 
 	void SetMeshName(const std::string& meshName) { this->meshName = meshName; }
 
-	void SetModelData(const ModelData& modelData) { this->modelData = modelData; }
+	void SetModelData(const ModelData& modelData) {
+		this->modelData = modelData;
+		calculateBoundingBox(); // Recalcula la bounding box al actualizar los datos
+	}
 
 	void SetMaterialIndex(int index) { materialIndex = index; }
 
 	int& GetMaterialIndex() { return materialIndex; }
+
+	const BoundingBox& getBoundingBox() const { return m_BoundingBox; }
 private:
 	std::string meshName;
 	ModelData modelData;
 	int materialIndex = -1;
+
+	BoundingBox m_BoundingBox; // Bounding box de la malla
+
+	void calculateBoundingBox(); // Método privado para calcular la bounding box
 };
 

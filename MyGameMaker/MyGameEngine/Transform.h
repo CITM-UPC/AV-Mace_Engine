@@ -34,10 +34,10 @@ public:
 	// Local Transform
 	const mat4 mat() const { return local_mat; }
 	mat4 &mat() { return local_mat; }
-	const vec3 left() const { return _left; }
-	const vec3 right() const { return _left; }
-	const vec3 up() const { return _up; }
-	const vec3 fwd() const { return _fwd; }
+	const auto& left() const { return _left; }
+	const auto& right() const { return _left; }
+	const auto& up() const { return _up; }
+	const auto& fwd() const { return _fwd; }
 	const auto* data() const { return &local_mat[0][0]; }
 	
 	// Global Transfrom

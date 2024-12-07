@@ -48,7 +48,7 @@ inline Point operator*(const mat4& mat, const Point& point) {
 inline Vector operator*(const mat4& mat, const Vector& vec) { 
 	return Vector(vec3(mat * vec4(vec.v, 0.0)));
 }
-inline Plane operator*(const mat4& mat, const Plane& plane) {
+inline Plane operator*(const glm::mat4& mat, const Plane& plane) {
 	return Plane(mat * plane.origin, mat * plane.normal);
 }
 

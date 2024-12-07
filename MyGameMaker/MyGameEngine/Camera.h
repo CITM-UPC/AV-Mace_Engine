@@ -7,7 +7,7 @@ class Camera : public Component
 	double _fov = glm::radians(60.0);
 	double _aspect = 16.0 / 9.0 ;
 	double zNear = 0.1;
-	double zFar = 128.0;
+	double zFar = 1280.0;
 	float _speed = 10.0f;
 
 public:
@@ -27,6 +27,8 @@ public:
 
 	glm::dmat4 projection() const;
 	glm::dmat4 view() const;
+
+	std::list<Plane> frustumPlanes() const;
 };
 
 

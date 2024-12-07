@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "Scene.h"
 #include "Engine.h"
+#include "BoundingBox.h"
 
 #include "Log.h"
 
@@ -405,7 +406,6 @@ static void createMeshesFromFBX(const aiScene& scene, std::vector<std::shared_pt
 		}
 
 		models[i]->SetModelData(*modelsData[i]);
-
 	}
 }
 
@@ -450,21 +450,47 @@ std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const ai
 	obj->GetComponent<Transform>()->mat() = aiMat4ToMat4(node.mTransformation);
 	obj->GetComponent<Transform>()->updateGlobalMatrix();
 
+	// Inicializa una bounding box combinada vacía
+	BoundingBox combinedBoundingBox;
+
 	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
 		const auto meshIndex = node.mMeshes[i];
-		const auto materialIndex = meshes[meshIndex].get()->GetMaterialIndex();
+		const auto& mesh = meshes[meshIndex];
+
 		obj->name() = meshes[meshIndex].get()->GetMeshName();
+
 		obj->AddComponent<Mesh>();
-		obj->GetComponent<Mesh>()->setModel(meshes[meshIndex]);
+		obj->GetComponent<Mesh>()->setModel(mesh);
+
 		obj->AddComponent<Material>();
-		obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[materialIndex]->m_TexturePath);
+		obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]->m_TexturePath);
 		obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 		obj->GetComponent<Mesh>()->loadToOpenGL();
+
+		BoundingBox meshBBox;
+
+		meshBBox.min = meshes[meshIndex].get()->GetModelData().vertexData.front();
+		meshBBox.max = meshes[meshIndex].get()->GetModelData().vertexData.front();
+
+		for (const auto& v : meshes[meshIndex].get()->GetModelData().vertexData) {
+			meshBBox.min = glm::min(meshBBox.min, glm::dvec3(v));
+			meshBBox.max = glm::max(meshBBox.max, glm::dvec3(v));
+		}
+
+		auto vertices = meshBBox.vertices();
+		for (auto& v : vertices) v = obj->AddComponent<Transform>()->mat() * vec4(v, 1);
+		combinedBoundingBox = BoundingBox(vertices.data(), vertices.size());
+		combinedBoundingBox = obj->AddComponent<Transform>()->mat() * combinedBoundingBox;
 	}
 
 	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-		obj->addChild(graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials));
+		auto child = graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials);
+		obj->addChild(child);
+
+		combinedBoundingBox = combinedBoundingBox + child->getBoundingBox();
 	}
+
+	obj->setBoundingBox(combinedBoundingBox);
 
 	return obj;
 }

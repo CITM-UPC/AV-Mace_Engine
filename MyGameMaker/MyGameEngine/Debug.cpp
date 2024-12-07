@@ -56,7 +56,7 @@ static void drawBoundingBox(const BoundingBox& bbox) {
 void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
-	//drawBoundingBox(obj.boundingBox());
+	drawBoundingBox(obj.getBoundingBox());
 	glMultMatrixd(obj.GetComponent<Transform>()->data());
 	drawAxis(0.5);
 	glColor3ub(0, 255, 255);
