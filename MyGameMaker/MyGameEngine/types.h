@@ -27,15 +27,18 @@ namespace Colors {
 struct Point { 
 	vec3 p;
 	Point(const vec3& p) : p(p) {}
+	Point() = default;
 };
 struct Vector { 
 	vec3 v; 
 	Vector(const vec3& v) : v(v) {}
+	Vector() = default;
 };
 struct Plane { 
 	Point origin; 
 	Vector normal; 
 	Plane(const Point& origin, const Vector& normal) : origin(origin), normal(normal) {}
+	Plane() = default;
 };
 
 inline Point operator*(const mat4& mat, const Point& point) {

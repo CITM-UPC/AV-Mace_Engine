@@ -13,6 +13,8 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Debug.h"
+#include "BoundingBox.h"
+#include "Frustum.h"
 
 //camera movement variables
 bool rightMouse = false;
@@ -126,7 +128,7 @@ void Scene::Update(double& dT)
 
 		//actualizo el vector forward de la camera
 		camera()->GetComponent<Transform>()->setFwd(glm::normalize(direction));
-		//uso vec3(0,1,0) porque busco el vector up en coordenadas world!!! igualmente acutalizo el vector up(local) de la camera
+		//uso vec3(0,1,0) porque busco el vector up en coordenadas world!!! igualmente actualizo el vector up(local) de la camera
 		camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
 		camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
 
@@ -239,7 +241,13 @@ void Scene::Draw(GameObject* root)
 	for (auto& child : root->children())
 	{
 		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
-			child->GetComponent<Mesh>()->drawModel();
+			glm::dmat4 projectionMatrix = camera()->GetComponent<Camera>()->projection();
+			Frustum frustum;
+			BoundingBox boundingBox = child->GetComponent<Mesh>()->boundingBox();
+
+			if (frustum.isBoundingBoxInFrustum(boundingBox)) {
+				child->GetComponent<Mesh>()->drawModel();
+			}
 		}
 
 		if (!child->children().empty()) Draw(child.get());
