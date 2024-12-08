@@ -39,8 +39,15 @@ void Scene::Start()
 {
 	// Init camera
 	InitCamera();
+	ModelLoader loader;
+	// Specify the paths for the FBX file and the custom format file
+	std::string fbxFilePath = "Assets/BakerHouse.fbx";
+	std::string customFilePath = "Library/Models/BakerHouse.model";
 
-	std::shared_ptr<GameObject> sceneobj = ModelLoader::loadFromFile("Assets/BakerHouse.fbx");
+	// Save the FBX file to the custom format
+	loader.saveFBXToCustomFormat(fbxFilePath, customFilePath);
+	//std::shared_ptr<GameObject> sceneobj = loader.loadFromFile("BakerHouse");
+	std::shared_ptr<GameObject> sceneobj = loader.loadFromFile(fbxFilePath);
 	root()->addChild(sceneobj);
 	root()->GetComponent<Transform>()->updateGlobalMatrix();
 
@@ -278,8 +285,8 @@ void Scene::loadGameObjectByPath(const std::string& path)
 		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 		root()->addChild(go);
 	}*/
-
-	std::shared_ptr<GameObject> scene = ModelLoader::loadFromFile(path);
+	ModelLoader loader;
+	std::shared_ptr<GameObject> scene = loader.loadFromFile(path);
 	root()->addChild(scene);
 	scene->GetComponent<Transform>()->updateGlobalMatrix();
 
