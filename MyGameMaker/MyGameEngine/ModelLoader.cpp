@@ -447,20 +447,15 @@ static mat4 aiMat4ToMat4(const aiMatrix4x4& aiMat) {
 }
 
 std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<shared_ptr<Material>>& materials) {
-
-	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>("scene.mName.C_Str()");
+	cout << node.mName.data << endl;
+	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>(node.mName.data);
 
 	obj->GetComponent<Transform>()->mat() = aiMat4ToMat4(node.mTransformation);
 	obj->GetComponent<Transform>()->updateGlobalMatrix();
 
-	// Inicializa una bounding box combinada vacía
-	BoundingBox combinedBoundingBox;
-
 	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
 		const auto meshIndex = node.mMeshes[i];
 		const auto& mesh = meshes[meshIndex];
-
-		obj->name() = meshes[meshIndex].get()->GetMeshName();
 
 		obj->AddComponent<Mesh>();
 		obj->GetComponent<Mesh>()->setModel(mesh);
@@ -480,20 +475,14 @@ std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const ai
 			meshBBox.max = glm::max(meshBBox.max, glm::dvec3(v));
 		}
 
-		auto vertices = meshBBox.vertices();
-		for (auto& v : vertices) v = obj->AddComponent<Transform>()->mat() * vec4(v, 1);
-		combinedBoundingBox = BoundingBox(vertices.data(), vertices.size());
-		combinedBoundingBox = obj->AddComponent<Transform>()->mat() * combinedBoundingBox;
+		obj->setBoundingBox(meshBBox);
+
 	}
 
 	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
 		auto child = graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials);
 		obj->addChild(child);
-
-		combinedBoundingBox = combinedBoundingBox + child->getBoundingBox();
 	}
-
-	obj->setBoundingBox(combinedBoundingBox);
 
 	return obj;
 }
@@ -536,7 +525,7 @@ std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filenam
 		aiReleaseImport(scene);
 
 		// Assign name and return
-		fbx_obj->name() = std::filesystem::path(filename).stem().string();
+		//fbx_obj->name() = std::filesystem::path(filename).stem().string();
 		return fbx_obj;
 	}
 }

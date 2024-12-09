@@ -5,8 +5,8 @@
 #include <array>
 
 struct BoundingBox {
-	vec3 min;
-	vec3 max;
+	vec3 min = vec3(0, 0, 0);
+	vec3 max = vec3(0, 0, 0);
 
 	vec3 center() const { return (min + max) * 0.5; }
 	vec3 size() const { return max - min; }
@@ -26,6 +26,8 @@ struct BoundingBox {
 	BoundingBox(const vec3* vertices, size_t num_verts);
 
 	BoundingBox operator+(const BoundingBox& other) const;
+
+	bool isEmpty() const { return min == max; }
 };
 
 

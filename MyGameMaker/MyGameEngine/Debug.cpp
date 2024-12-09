@@ -1,5 +1,6 @@
 #include "Debug.h"
 #include "GameObject.h"
+#include "Mesh.h"
 #include "Transform.h"
 #include <GL/glew.h>
 #include <imgui.h>
@@ -56,16 +57,25 @@ static void drawBoundingBox(const BoundingBox& bbox) {
 void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
-	drawBoundingBox(obj.getBoundingBox());
 	glMultMatrixd(obj.GetComponent<Transform>()->data());
 	drawAxis(0.5);
 	glColor3ub(0, 255, 255);
-	//drawBoundingBox(obj.localBoundingBox());
-
-	//glColor3ub(255, 0, 0);
-	//if (obj.hasMesh()) drawBoundingBox(obj.mesh().boundingBox());
-
+	BoundingBox bbox;
+	BoundingBox parentbbox;
+	for (const auto& child : obj.children()) {
+		if (child->HasComponent<Mesh>()) {
+			bbox = child->getBoundingBox();
+			parentbbox = bbox + parentbbox;
+			drawBoundingBox(bbox);
+		}
+	}
+	glColor3ub(255, 255, 0);
+	if (obj.hasParent()) {
+		drawBoundingBox(parentbbox);
+	}
 	for (const auto& child : obj.children()) drawDebugInfoForGraphicObject(*child);
+	
+
 	glPopMatrix();
 }
 /*

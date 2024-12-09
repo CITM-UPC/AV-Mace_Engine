@@ -41,7 +41,7 @@ void Scene::Start()
 	InitCamera();
 	ModelLoader loader;
 	// Specify the paths for the FBX file and the custom format file
-	std::string fbxFilePath = "Assets/BakerHouse.fbx";
+	std::string fbxFilePath = "Assets/street2.FBX";
 	std::string customFilePath = "Library/Models/BakerHouse.model";
 
 	// Save the FBX file to the custom format
@@ -51,26 +51,42 @@ void Scene::Start()
 	root()->addChild(sceneobj);
 	root()->GetComponent<Transform>()->updateGlobalMatrix();
 
-	/*std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
+	//std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
 
-	ModelLoader modelLoader;
-	std::vector<std::shared_ptr<Model>> models;
-	modelLoader.load("Assets/FBX/BakerHouse.fbx", models);
-	for (size_t i = 0; i < models.size(); i++)
-	{
-		std::shared_ptr<GameObject> go = std::make_shared<GameObject>(models[i].get()->GetMeshName());
-		bakerHouse->addChild(go);
-		
-		go->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
-		go->GetComponent<Transform>()->updateGlobalMatrix();
-		go->AddComponent<Mesh>();
-		go->GetComponent<Mesh>()->setModel(models[i]);
-		go->GetComponent<Mesh>()->setFilePath("Assets/FBX/BakerHouse.fbx");
-		go->AddComponent<Material>();
-		go->GetComponent<Material>()->m_Texture = std::make_unique<Texture>("Assets/Textures/Baker_house.png");
-		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-		go->GetComponent<Mesh>()->loadToOpenGL();
-	}*/
+	//ModelLoader modelLoader;
+	//std::vector<std::shared_ptr<Model>> models;
+	//modelLoader.load("Assets/FBX/BakerHouse.fbx", models);
+	//BoundingBox combinedBoundingBox;
+	//for (size_t i = 0; i < models.size(); i++)
+	//{
+	//	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(models[i].get()->GetMeshName());
+	//	bakerHouse->addChild(go);
+	//	
+	//	go->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
+	//	go->GetComponent<Transform>()->updateGlobalMatrix();
+	//	go->AddComponent<Mesh>();
+	//	go->GetComponent<Mesh>()->setModel(models[i]);
+	//	go->GetComponent<Mesh>()->setFilePath("Assets/FBX/BakerHouse.fbx");
+	//	go->AddComponent<Material>();
+	//	go->GetComponent<Material>()->m_Texture = std::make_unique<Texture>("Assets/Textures/Baker_house.png");
+	//	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	//	go->GetComponent<Mesh>()->loadToOpenGL();
+
+	//	BoundingBox meshBBox;
+
+	//	meshBBox.min = models[i]->GetModelData().vertexData.front();
+	//	meshBBox.max = models[i]->GetModelData().vertexData.front();
+
+	//	for (const auto& v : models[i]->GetModelData().vertexData) {
+	//		meshBBox.min = glm::min(meshBBox.min, glm::dvec3(v));
+	//		meshBBox.max = glm::max(meshBBox.max, glm::dvec3(v));
+	//	}
+
+	//	auto vertices = meshBBox.vertices();
+	//	for (auto& v : vertices) v = go->GetComponent<Transform>()->mat() * vec4(v, 1);
+	//	combinedBoundingBox = BoundingBox(vertices.data(), vertices.size());
+	//	combinedBoundingBox = go->GetComponent<Transform>()->mat() * combinedBoundingBox;
+	//}
 }
 
 void Scene::Update(double& dT)
