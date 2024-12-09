@@ -138,11 +138,9 @@ void PanelInspector::DrawTransformControls(GameObject* gameObject)
 {
     if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        auto* transform = gameObject->GetComponent<Transform>();
+        auto& transform = gameObject->GetComponent<Transform>();
 
-		showComponent = transform->isActive();
-        ImGui::Checkbox("Active", &showComponent);
-		transform->SetActive(showComponent);
+        ImGui::Checkbox("Active", &transform.isActive());
 		ImGui::SameLine();
         ImGui::Text("      X         Y         Z");
 
@@ -150,12 +148,12 @@ void PanelInspector::DrawTransformControls(GameObject* gameObject)
         ImGui::Text("Position   ");
 		ImGui::SameLine();
         ImGui::SetNextItemWidth(210.0f);
-        float pos[3] = { transform->pos().x, transform->pos().y, transform->pos().z };
+        float pos[3] = { transform.pos().x, transform.pos().y, transform.pos().z };
         if (ImGui::DragFloat3("##position", pos, 0.1f, -FLT_MAX, FLT_MAX, "%.2f") | ImGuiInputTextFlags_CharsDecimal)
         {
             if (ImGui::IsItemActive()) {
                 Engine::Instance().input->ActivateTextInput();
-                transform->translate(pos);
+                transform.translate(pos);
             }
             else if (ImGui::IsItemDeactivatedAfterEdit()) {
                 Engine::Instance().input->ActivateTextInput(false);
@@ -166,12 +164,12 @@ void PanelInspector::DrawTransformControls(GameObject* gameObject)
         ImGui::Text("Rotation   ");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(210.0f);
-        glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(transform->rot()));
+        glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(transform.rot()));
         if (ImGui::DragFloat3("##rotation", &eulerAngles.x, 0.1f, -360.0f, 360.0f, "%.2f") | ImGuiInputTextFlags_CharsDecimal)
         {
             if (ImGui::IsItemActive()) {
                 Engine::Instance().input->ActivateTextInput();
-                transform->rotate(glm::radians(eulerAngles));
+                transform.rotate(glm::radians(eulerAngles));
             }
             else if (ImGui::IsItemDeactivatedAfterEdit()) {
                 Engine::Instance().input->ActivateTextInput(false);
@@ -183,13 +181,13 @@ void PanelInspector::DrawTransformControls(GameObject* gameObject)
 		ImGui::Checkbox("##uniform_scale", &uniformScale);
         ImGui::SameLine();
 		ImGui::SetNextItemWidth(210.0f);
-		float scale[3] = { transform->scale().x, transform->scale().y, transform->scale().z };
+		float scale[3] = { transform.scale().x, transform.scale().y, transform.scale().z };
         if (ImGui::DragFloat3("##scale", scale, 0.1f, -FLT_MAX, FLT_MAX, "%.2f") | ImGuiInputTextFlags_CharsDecimal)
         {
             if (ImGui::IsItemActive()) {
                 Engine::Instance().input->ActivateTextInput();
-                if (uniformScale) transform->scale(vec3(scale[0]));
-                else transform->scale(glm::vec3(scale[0], scale[1], scale[2]));
+                if (uniformScale) transform.scale(vec3(scale[0]));
+                else transform.scale(glm::vec3(scale[0], scale[1], scale[2]));
             }
             else if (ImGui::IsItemDeactivatedAfterEdit()) {
                 Engine::Instance().input->ActivateTextInput(false);
@@ -203,27 +201,24 @@ void PanelInspector::DrawMeshControls(GameObject* gameObject)
 {
     if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
     {
-		auto* mesh = gameObject->GetComponent<Mesh>();
+		auto& mesh = gameObject->GetComponent<Mesh>();
 
-		showComponent = mesh->isActive();
-        ImGui::Checkbox("Active", &showComponent);
-		mesh->SetActive(showComponent);
+        ImGui::Checkbox("Active", &mesh.isActive());
 		ImGui::SameLine();
 		ImGui::Text("  File:");
 		ImGui::SameLine();
         ImGui::SetNextItemWidth(170.0f);
-        char buffer[128] = {};
-        strncpy_s(buffer, mesh->getFilePath().c_str(), sizeof(buffer));
-        ImGui::InputText("##mesh_path", buffer, sizeof(buffer));
+		ImVec4 cian(0.0f, 1.0f, 1.0f, 1.0f); // Cian
+		ImGui::TextColored(cian, mesh.getFilePath().c_str());
 
         ImGui::Text("Display Normals:");
-        showPerTriangleNormals = mesh->getDebugNormals();
+        showPerTriangleNormals = mesh.getDebugNormals();
         ImGui::Checkbox("Vertex Normals", &showPerTriangleNormals);
-        mesh->setDebugNormals(showPerTriangleNormals);
+        mesh.setDebugNormals(showPerTriangleNormals);
 
-        showPerFaceNormals = gameObject->GetComponent<Mesh>()->getDebugFaceNormals();
+        showPerFaceNormals = gameObject->GetComponent<Mesh>().getDebugFaceNormals();
         ImGui::Checkbox("Face Normals", &showPerFaceNormals);
-        mesh->setDebugFaceNormals(showPerFaceNormals);
+        mesh.setDebugFaceNormals(showPerFaceNormals);
         ImGui::Separator();
     }
 }
@@ -232,27 +227,25 @@ void PanelInspector::DrawMaterialControls(GameObject* gameObject)
 {
     if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
     {
-		auto* material = gameObject->GetComponent<Material>();
+		auto& material = gameObject->GetComponent<Material>();
 
-		showComponent = material->isActive();
-        ImGui::Checkbox("Active", &showComponent);
-		material->SetActive(showComponent);
+        ImGui::Checkbox("Active", &material.isActive());
         ImGui::Text(" ");
         ImGui::Text("Main Maps");
         ImVec4 magenta(1.0f, 0.0f, 1.0f, 1.0f); // Magenta
 
-        if (material->m_Texture) {
+        if (material.m_Texture) {
             ImGui::Text("Texture:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(200.0f);
-            ImGui::TextColored(magenta, material->m_Texture->GetFilePath().c_str());
+            ImGui::TextColored(magenta, material.m_Texture->GetFilePath().c_str());
         }
 		
-        if (material->m_Shader) {
+        if (material.m_Shader) {
             ImGui::Text("Shader:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(200.0f);
-            ImGui::TextColored(magenta, material->m_Shader->GetFilePath().c_str());
+            ImGui::TextColored(magenta, material.m_Shader->GetFilePath().c_str());
         }
        
         ImGui::Checkbox("Albedo", &showCheckers);
@@ -265,17 +258,15 @@ void PanelInspector::DrawCameraControls(GameObject* gameObject)
 {
 	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		auto* camera = gameObject->GetComponent<Camera>();
+		auto& camera = gameObject->GetComponent<Camera>();
 
-		showComponent = camera->isActive();
-		ImGui::Checkbox("Active", &showComponent);
-		camera->SetActive(showComponent);
+		ImGui::Checkbox("Active", &camera.isActive());
 		ImGui::Text(" ");
 		ImGui::Text("Projection:");
 		ImGui::Text("Field of View");
         ImGui::Text("       ");
         ImGui::SameLine();
-        if (ImGui::SliderScalar("##fov", ImGuiDataType_Double, &camera->fov(), &min_value, &max_value, "%.2f"))
+        if (ImGui::SliderScalar("##fov", ImGuiDataType_Double, &camera.fov(), &min_value, &max_value, "%.2f"))
         {
             if (ImGui::IsItemActive()) {
                 Engine::Instance().input->ActivateTextInput();
@@ -288,7 +279,7 @@ void PanelInspector::DrawCameraControls(GameObject* gameObject)
 		ImGui::Text("Near Plane");
         ImGui::Text("       ");
 		ImGui::SameLine();
-        if (ImGui::SliderScalar("##zNear", ImGuiDataType_Double, &camera->near(), &min_value, &max_value, "%.2f"))
+        if (ImGui::SliderScalar("##zNear", ImGuiDataType_Double, &camera.near(), &min_value, &max_value, "%.2f"))
         {
             if (ImGui::IsItemActive()) {
                 Engine::Instance().input->ActivateTextInput();
@@ -301,7 +292,7 @@ void PanelInspector::DrawCameraControls(GameObject* gameObject)
 		ImGui::Text("Far Plane");
         ImGui::Text("       ");
         ImGui::SameLine();
-        if (ImGui::SliderScalar("##zFar", ImGuiDataType_Double, &camera->far(), &min_value, &max_value, "%.2f"))
+        if (ImGui::SliderScalar("##zFar", ImGuiDataType_Double, &camera.far(), &min_value, &max_value, "%.2f"))
         {
             if (ImGui::IsItemActive()) {
                 Engine::Instance().input->ActivateTextInput();

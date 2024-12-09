@@ -41,11 +41,9 @@ class Mesh : public Component
 	unsigned int vBfaceNormalLinesID = -1;
 	bool debugFaceNormals = false;
 
-
 public:
-	Mesh() {}
-	Mesh(bool active, GameObject* owner) : Component(active, owner) {}
-	~Mesh() {}
+	explicit Mesh(GameObject* owner) : Component(owner) {}
+	Mesh(GameObject* owner, const glm::vec3* verts, size_t num_verts, const unsigned int* indexs, size_t num_indexs) : Component(owner) { load(verts, num_verts, indexs, num_indexs); }
 
 	const auto& vertices() const { return _vertices; }
 	const auto& indices() const { return _indices; }

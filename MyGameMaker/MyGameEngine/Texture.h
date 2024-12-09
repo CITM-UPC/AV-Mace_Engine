@@ -13,6 +13,7 @@ private:
 	int m_Width, m_Height, m_BPP;
 
 public:
+	Texture() = default;
 	Texture(const string& path, unsigned int* valor = nullptr);
 	~Texture();
 

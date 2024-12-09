@@ -73,11 +73,7 @@ public:
 	void setUp(const vec3& up) { _up = up; }
 	void makeDirty() { isDirty = true; }
 
-	Transform() = default;
-	Transform(const mat4& mat);
-	Transform(bool active, GameObject* owner);
-	Transform operator*(const mat4& other) { return Transform(local_mat * other); }
-	Transform operator*(const Transform& other) { return Transform(local_mat * other.local_mat); }
+	explicit Transform(GameObject* owner) : Component(owner) {}
+	Transform& operator*=(const mat4& other) {	local_mat *= other;	return *this;	}
+	Transform& operator*=(const Transform& other) {	local_mat *= other.local_mat; return *this;	}
 };
-
-inline Transform operator*(const mat4& m, const Transform& t) { return Transform(m * t.mat()); }

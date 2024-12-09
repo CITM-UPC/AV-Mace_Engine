@@ -57,7 +57,7 @@ void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
 	//drawBoundingBox(obj.boundingBox());
-	glMultMatrixd(obj.GetComponent<Transform>()->data());
+	glMultMatrixd(obj.GetComponent<Transform>().data());
 	drawAxis(0.5);
 	glColor3ub(0, 255, 255);
 	//drawBoundingBox(obj.localBoundingBox());
@@ -65,7 +65,7 @@ void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	//glColor3ub(255, 0, 0);
 	//if (obj.hasMesh()) drawBoundingBox(obj.mesh().boundingBox());
 
-	for (const auto& child : obj.children()) drawDebugInfoForGraphicObject(*child);
+	for (const auto& child : obj.children()) drawDebugInfoForGraphicObject(child);
 	glPopMatrix();
 }
 /*

@@ -37,40 +37,19 @@ void Scene::Start()
 {
 	// Init camera
 	InitCamera();
-
-	std::shared_ptr<GameObject> sceneobj = ModelLoader::loadFromFile("Assets/FBX/BakerHouse.fbx");
-	root()->addChild(sceneobj);
-
-	/*std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
-
-	ModelLoader modelLoader;
-	std::vector<std::shared_ptr<Model>> models;
-	modelLoader.load("Assets/FBX/BakerHouse.fbx", models);
-	for (size_t i = 0; i < models.size(); i++)
-	{
-		std::shared_ptr<GameObject> go = std::make_shared<GameObject>(models[i].get()->GetMeshName());
-		bakerHouse->addChild(go);
-		
-		go->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
-		go->GetComponent<Transform>()->updateGlobalMatrix();
-		go->AddComponent<Mesh>();
-		go->GetComponent<Mesh>()->setModel(models[i]);
-		go->GetComponent<Mesh>()->setFilePath("Assets/FBX/BakerHouse.fbx");
-		go->AddComponent<Material>();
-		go->GetComponent<Material>()->m_Texture = std::make_unique<Texture>("Assets/Textures/Baker_house.png");
-		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-		go->GetComponent<Mesh>()->loadToOpenGL();
-	}*/
+	root()->emplaceChild(ModelLoader::loadFromFile("Assets/FBX/BakerHouse.fbx"));
 }
 
 void Scene::Update(double& dT)
 {
+	root()->children();
+
 	//camera speed
 	if (Engine::Instance().input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT) {
-		camera()->GetComponent<Camera>()->speed() = 20.0f;
+		camera()->GetComponent<Camera>().speed() = 20.0f;
 	}
 	else {
-		camera()->GetComponent<Camera>()->speed() = 10.0f;
+		camera()->GetComponent<Camera>().speed() = 10.0f;
 	}
 
 	//camera rotation
@@ -86,16 +65,16 @@ void Scene::Update(double& dT)
 	{
 		//camera movement
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) {
-			camera()->GetComponent<Transform>()->translate(vec3(0, 0, camera()->GetComponent<Camera>()->speed() * dT));
+			camera()->GetComponent<Transform>().translate(vec3(0, 0, camera()->GetComponent<Camera>().speed() * dT));
 		}
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) {
-			camera()->GetComponent<Transform>()->translate(vec3(camera()->GetComponent<Camera>()->speed() * dT, 0, 0));
+			camera()->GetComponent<Transform>().translate(vec3(camera()->GetComponent<Camera>().speed() * dT, 0, 0));
 		}
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) {
-			camera()->GetComponent<Transform>()->translate(vec3(0, 0, -camera()->GetComponent<Camera>()->speed() * dT));
+			camera()->GetComponent<Transform>().translate(vec3(0, 0, -camera()->GetComponent<Camera>().speed() * dT));
 		}
 		if (Engine::Instance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) {
-			camera()->GetComponent<Transform>()->translate(vec3(-camera()->GetComponent<Camera>()->speed() * dT, 0, 0));
+			camera()->GetComponent<Transform>().translate(vec3(-camera()->GetComponent<Camera>().speed() * dT, 0, 0));
 		}
 
 		Engine::Instance().input->GetMousePosition(mouseX, mouseY);
@@ -108,8 +87,8 @@ void Scene::Update(double& dT)
 		dx *= sensitivity;
 		dy *= sensitivity;
 
-		yaw = glm::degrees(atan2(camera()->GetComponent<Transform>()->fwd().z, camera()->GetComponent<Transform>()->fwd().x));
-		pitch = glm::degrees(atan2(camera()->GetComponent<Transform>()->fwd().y, glm::sqrt(camera()->GetComponent<Transform>()->fwd().x * camera()->GetComponent<Transform>()->fwd().x + camera()->GetComponent<Transform>()->fwd().z * camera()->GetComponent<Transform>()->fwd().z)));
+		yaw = glm::degrees(atan2(camera()->GetComponent<Transform>().fwd().z, camera()->GetComponent<Transform>().fwd().x));
+		pitch = glm::degrees(atan2(camera()->GetComponent<Transform>().fwd().y, glm::sqrt(camera()->GetComponent<Transform>().fwd().x * camera()->GetComponent<Transform>().fwd().x + camera()->GetComponent<Transform>().fwd().z * camera()->GetComponent<Transform>().fwd().z)));
 
 		yaw += dx;
 		pitch -= dy;
@@ -119,16 +98,16 @@ void Scene::Update(double& dT)
 		if (pitch < -89.0f)
 			pitch = -89.0f;
 
-		glm::vec3 direction;
+		glm::vec3 direction(0,0,0);
 		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		direction.y = sin(glm::radians(pitch));
 		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
 		//actualizo el vector forward de la camera
-		camera()->GetComponent<Transform>()->setFwd(glm::normalize(direction));
+		camera()->GetComponent<Transform>().setFwd(glm::normalize(direction));
 		//uso vec3(0,1,0) porque busco el vector up en coordenadas world!!! igualmente acutalizo el vector up(local) de la camera
-		camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
-		camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
+		camera()->GetComponent<Transform>().setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>().fwd())));
+		camera()->GetComponent<Transform>().setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>().fwd(), camera()->GetComponent<Transform>().right())));
 
 		Engine::Instance().input->GetMousePosition(lastMouseX, lastMouseY);
 	}
@@ -147,16 +126,16 @@ void Scene::Update(double& dT)
 				fovModifier += 1.0;
 			}
 		}
-		camera()->GetComponent<Camera>()->fov() = glm::radians(60 + fovModifier);
+		camera()->GetComponent<Camera>().fov() = glm::radians(60 + fovModifier);
 	}
 
 	//camera focus
 	if (Engine::Instance().input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) {
 		if (selectedGameObject != nullptr) {
-			camera()->GetComponent<Transform>()->pos() = selectedGameObject->GetComponent<Transform>()->glob_pos() + vec3(0, 3, 8);
-			camera()->GetComponent<Transform>()->setFwd(glm::normalize(selectedGameObject->GetComponent<Transform>()->glob_pos() - camera()->GetComponent<Transform>()->pos()));
-			camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
-			camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
+			camera()->GetComponent<Transform>().pos() = selectedGameObject->GetComponent<Transform>().glob_pos() + vec3(0, 3, 8);
+			camera()->GetComponent<Transform>().setFwd(glm::normalize(selectedGameObject->GetComponent<Transform>().glob_pos() - camera()->GetComponent<Transform>().pos()));
+			camera()->GetComponent<Transform>().setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>().fwd())));
+			camera()->GetComponent<Transform>().setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>().fwd(), camera()->GetComponent<Transform>().right())));
 		}
 		else {
 			LOG(LogType::LOG_WARNING, "Select an Object!");
@@ -176,10 +155,10 @@ void Scene::Update(double& dT)
 		if (selectedGameObject != nullptr) 
 		{
 			Engine::Instance().input->GetMousePosition(mouseX, mouseY);
-			vec3 targetPos = selectedGameObject->GetComponent<Transform>()->glob_pos();
+			vec3 targetPos = selectedGameObject->GetComponent<Transform>().glob_pos();
 
 			// Calcular la distancia y offset inicial entre la cámara y el objeto
-			vec3 offset = camera()->GetComponent<Transform>()->pos() - targetPos;
+			vec3 offset = camera()->GetComponent<Transform>().pos() - targetPos;
 			float orbitDistance = glm::length(offset);
 
 			// Calcular ángulos iniciales de la cámara
@@ -204,12 +183,12 @@ void Scene::Update(double& dT)
 			offset.y = orbitDistance * sin(verticalAngle);
 			offset.z = orbitDistance * cos(verticalAngle) * cos(horizontalAngle);
 
-			camera()->GetComponent<Transform>()->pos() = targetPos + offset;
+			camera()->GetComponent<Transform>().pos() = targetPos + offset;
 
 			// Actualizar la dirección de la cámara para que mire al objeto
-			camera()->GetComponent<Transform>()->setFwd(glm::normalize(targetPos - camera()->GetComponent<Transform>()->pos()));
-			camera()->GetComponent<Transform>()->setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>()->fwd())));
-			camera()->GetComponent<Transform>()->setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>()->fwd(), camera()->GetComponent<Transform>()->right())));
+			camera()->GetComponent<Transform>().setFwd(glm::normalize(targetPos - camera()->GetComponent<Transform>().pos()));
+			camera()->GetComponent<Transform>().setRigth(glm::normalize(glm::cross(vec3(0, 1, 0), camera()->GetComponent<Transform>().fwd())));
+			camera()->GetComponent<Transform>().setUp(glm::normalize(glm::cross(camera()->GetComponent<Transform>().fwd(), camera()->GetComponent<Transform>().right())));
 
 			Engine::Instance().input->GetMousePosition(lastMouseX, lastMouseY);
 		}
@@ -234,18 +213,18 @@ void Scene::CleanUp()
 
 void Scene::OnSceneChange() {}
 
-void Scene::Draw(GameObject* root)
+void Scene::Draw(GameObject& root)
 {
-	for (auto& child : root->children())
+	for (auto& child : root.children())
 	{
-		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
-			child->GetComponent<Mesh>()->drawModel();
+		if (child.isActive() && child.HasComponent<Mesh>() && child.GetComponent<Mesh>().isActive()) {
+			child.GetComponent<Mesh>().drawModel();
 		}
 
-		if (!child->children().empty()) Draw(child.get());
+		if (!child.children().empty()) Draw(child);
 	}
 
-	drawDebugInfoForGraphicObject(*root);
+	drawDebugInfoForGraphicObject(root);
 }
 
 void Scene::loadGameObjectByPath(const std::string& path)
@@ -263,46 +242,44 @@ void Scene::loadGameObjectByPath(const std::string& path)
 		go->GetComponent<Mesh>()->loadToOpenGL();
 		go->AddComponent<Material>();
 		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-		root()->addChild(go);
+		root()->emplaceChild(go);
 	}*/
 
-	std::shared_ptr<GameObject> scene = ModelLoader::loadFromFile(path);
-	root()->addChild(scene);
-	scene->GetComponent<Transform>()->updateGlobalMatrix();
-
-	LOG(LogType::LOG_INFO, "Model loaded successfully!");
+	root()->emplaceChild(ModelLoader::loadFromFile(path));
 }
 
 void Scene::loadTextureByPath(const std::string& path)
 {
 	if (selectedGameObject != nullptr) {
-		selectedGameObject->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(path);
+		selectedGameObject->GetComponent<Material>().m_Texture = std::make_unique<Texture>(path);
 	}
 	else {
 		LOG(LogType::LOG_WARNING,"Select an Object!");
 	}
 }
 
-std::shared_ptr<GameObject> Scene::CreateGameObject(const std::string& name)
+void Scene::CreateGameObject(const std::string& name)
 {
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::EMPTY, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(name.c_str());
-	go->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
+	GameObject go = GameObject(name);
+	go.GetComponent<Transform>().pos() = vec3(0, 0, 0);
+	go.GetComponent<Transform>().updateGlobalMatrix();
 
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
-
-	return go;
+	if (selectedGameObject == nullptr) { 
+		root()->emplaceChild(std::move(go)); 
+		selectedGameObject = &root()->children().back();
+	}
+	else { selectedGameObject->emplaceChild(std::move(go)); }
 }
 
 void Scene::InitCamera()
 {
 	_camera.AddComponent<Camera>();
-	_camera.GetComponent<Transform>()->translate(vec3(0, 3, 8));
-	_camera.GetComponent<Transform>()->rotate(glm::radians(180.0), vec3(0, 1, 0));
-	_camera.GetComponent<Transform>()->rotate(glm::radians(20.0), vec3(1, 0, 0));
+	_camera.GetComponent<Transform>().translate(vec3(0, 3, 8));
+	_camera.GetComponent<Transform>().rotate(glm::radians(180.0), vec3(0, 1, 0));
+	_camera.GetComponent<Transform>().rotate(glm::radians(20.0), vec3(1, 0, 0));
 }
 
 void Scene::CreateCube()
@@ -310,18 +287,18 @@ void Scene::CreateCube()
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::CUBE, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
+	GameObject go = GameObject(model.get()->GetMeshName());
 	
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
+	if (selectedGameObject == nullptr) root()->emplaceChild(std::move(go));
+	else selectedGameObject->emplaceChild(std::move(go));
 	
-	go->GetComponent<Transform>()->pos() = vec3(10, 0, 0);
-	go->GetComponent<Transform>()->updateGlobalMatrix();
-	go->AddComponent<Mesh>();
-	go->GetComponent<Mesh>()->setModel(model);
-	go->GetComponent<Mesh>()->loadToOpenGL();
-	go->AddComponent<Material>();
-	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	go.GetComponent<Transform>().pos() = vec3(10, 0, 0);
+	go.GetComponent<Transform>().updateGlobalMatrix();
+	go.AddComponent<Mesh>();
+	go.GetComponent<Mesh>().setModel(model);
+	go.GetComponent<Mesh>().loadToOpenGL();
+	go.AddComponent<Material>();
+	go.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 }
 
 void Scene::CreatePlane() 
@@ -329,17 +306,17 @@ void Scene::CreatePlane()
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::PLANE, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
-	go->GetComponent<Transform>()->pos() = vec3(-5, 0, 0);
-	go->GetComponent<Transform>()->updateGlobalMatrix();
-	go->AddComponent<Mesh>();
-	go->GetComponent<Mesh>()->setModel(model);
-	go->GetComponent<Mesh>()->loadToOpenGL();
-	go->AddComponent<Material>();
-	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	GameObject go = GameObject(model.get()->GetMeshName());
+	go.GetComponent<Transform>().pos() = vec3(-5, 0, 0);
+	go.GetComponent<Transform>().updateGlobalMatrix();
+	go.AddComponent<Mesh>();
+	go.GetComponent<Mesh>().setModel(model);
+	go.GetComponent<Mesh>().loadToOpenGL();
+	go.AddComponent<Material>();
+	go.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
+	if (selectedGameObject == nullptr) root()->emplaceChild(std::move(go));
+	else selectedGameObject->emplaceChild(std::move(go));
 }
 
 void Scene::CreateSphere()
@@ -347,17 +324,17 @@ void Scene::CreateSphere()
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::SPHERE, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
-	go->GetComponent<Transform>()->pos() = vec3(10, 0, -5);
-	go->GetComponent<Transform>()->updateGlobalMatrix();
-	go->AddComponent<Mesh>();
-	go->GetComponent<Mesh>()->setModel(model);
-	go->GetComponent<Mesh>()->loadToOpenGL();
-	go->AddComponent<Material>();
-	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	GameObject go = GameObject(model.get()->GetMeshName());
+	go.GetComponent<Transform>().pos() = vec3(10, 0, -5);
+	go.GetComponent<Transform>().updateGlobalMatrix();
+	go.AddComponent<Mesh>();
+	go.GetComponent<Mesh>().setModel(model);
+	go.GetComponent<Mesh>().loadToOpenGL();
+	go.AddComponent<Material>();
+	go.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
+	if (selectedGameObject == nullptr) root()->emplaceChild(std::move(go));
+	else selectedGameObject->emplaceChild(std::move(go));
 }
 
 void Scene::CreateCylinder()
@@ -365,17 +342,17 @@ void Scene::CreateCylinder()
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::CYLINDER, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
-	go->GetComponent<Transform>()->pos() = vec3(-5, 0, -5);
-	go->GetComponent<Transform>()->updateGlobalMatrix();
-	go->AddComponent<Mesh>();
-	go->GetComponent<Mesh>()->setModel(model);
-	go->GetComponent<Mesh>()->loadToOpenGL();
-	go->AddComponent<Material>();
-	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	GameObject go = GameObject(model.get()->GetMeshName());
+	go.GetComponent<Transform>().pos() = vec3(-5, 0, -5);
+	go.GetComponent<Transform>().updateGlobalMatrix();
+	go.AddComponent<Mesh>();
+	go.GetComponent<Mesh>().setModel(model);
+	go.GetComponent<Mesh>().loadToOpenGL();
+	go.AddComponent<Material>();
+	go.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
+	if (selectedGameObject == nullptr) root()->emplaceChild(std::move(go));
+	else selectedGameObject->emplaceChild(std::move(go));
 }
 
 void Scene::CreateCone()
@@ -383,17 +360,17 @@ void Scene::CreateCone()
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::CONE, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
-	go->GetComponent<Transform>()->pos() = vec3(0, 0, -5);
-	go->GetComponent<Transform>()->updateGlobalMatrix();
-	go->AddComponent<Mesh>();
-	go->GetComponent<Mesh>()->setModel(model);
-	go->GetComponent<Mesh>()->loadToOpenGL();
-	go->AddComponent<Material>();
-	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	GameObject go = GameObject(model.get()->GetMeshName());
+	go.GetComponent<Transform>().pos() = vec3(0, 0, -5);
+	go.GetComponent<Transform>().updateGlobalMatrix();
+	go.AddComponent<Mesh>();
+	go.GetComponent<Mesh>().setModel(model);
+	go.GetComponent<Mesh>().loadToOpenGL();
+	go.AddComponent<Material>();
+	go.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
+	if (selectedGameObject == nullptr) root()->emplaceChild(std::move(go));
+	else selectedGameObject->emplaceChild(std::move(go));
 }
 
 void Scene::CreateTorus()
@@ -401,15 +378,15 @@ void Scene::CreateTorus()
 	ModelLoader modelLoader;
 	std::shared_ptr<Model> model;
 	modelLoader.load(Shapes::TORUS, model);
-	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(model.get()->GetMeshName());
-	go->GetComponent<Transform>()->pos() = vec3(5, 0, -5);
-	go->GetComponent<Transform>()->updateGlobalMatrix();
-	go->AddComponent<Mesh>();
-	go->GetComponent<Mesh>()->setModel(model);
-	go->GetComponent<Mesh>()->loadToOpenGL();
-	go->AddComponent<Material>();
-	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+	GameObject go = GameObject(model.get()->GetMeshName());
+	go.GetComponent<Transform>().pos() = vec3(5, 0, -5);
+	go.GetComponent<Transform>().updateGlobalMatrix();
+	go.AddComponent<Mesh>();
+	go.GetComponent<Mesh>().setModel(model);
+	go.GetComponent<Mesh>().loadToOpenGL();
+	go.AddComponent<Material>();
+	go.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
 
-	if (selectedGameObject == nullptr) root()->addChild(go);
-	else selectedGameObject->addChild(go);
+	if (selectedGameObject == nullptr) root()->emplaceChild(std::move(go));
+	else selectedGameObject->emplaceChild(std::move(go));
 }

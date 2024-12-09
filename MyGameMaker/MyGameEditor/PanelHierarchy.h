@@ -14,7 +14,7 @@ public:
 	~PanelHierarchy();
 
 	bool Draw();
-	void DrawGameObjectTree(GameObject* gameObject);
+	void DrawGameObjectTree(GameObject& gameObject);
 	GameObject* selectedGameObject() { return _selectedGameObject; }
 	void SetSelectedGameObject(GameObject* gameObject) { _selectedGameObject = gameObject; }
 

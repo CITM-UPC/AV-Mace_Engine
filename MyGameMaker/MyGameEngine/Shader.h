@@ -20,6 +20,7 @@ private:
 	unordered_map<string, int> m_UniformLocationCache;
 
 public:
+	Shader() = default;
 	Shader(const string& filepath);
 	~Shader();
 

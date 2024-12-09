@@ -1,24 +1,35 @@
-#ifndef __GAMEOBJECT_H__
-#define __GAMEOBJECT_H__
 #pragma once
 
 #include <string>
 #include <vector>
 #include "TreeExtension.h"
-#include "Component.h"
-
-class Component;
+#include "PolymorphList.h"
 
 class GameObject : public TreeExtension<GameObject>
 {
+public:
+	class IComponent
+	{
+	public:
+		virtual const GameObject* owner() const = 0;
+		virtual GameObject* owner() = 0;
+		virtual void SetOwner(GameObject* owner) = 0;
+	};
+
+private:
 	std::string _name;
 	std::string _tag;
 	bool _active;
-	std::vector<Component*> _components;
+	PolymorphList<IComponent> _components;
 
 public:
+	GameObject() {}
 	GameObject(const std::string& name, const std::string& tag = "Untagged", bool active = true);
-	~GameObject() {}
+	GameObject(const GameObject& other) = delete;
+	GameObject(GameObject&& other) noexcept;
+	GameObject& operator=(const GameObject& other) = delete;
+	GameObject& operator=(GameObject&& other) noexcept = delete;
+	virtual ~GameObject() = default;
 
 	auto& name() { return _name; }
 	auto& tag() { return _tag; }
@@ -27,35 +38,19 @@ public:
 	virtual bool SetActive(bool active) { return this->_active = active; }
 	virtual bool SwitchState() { return _active = !_active; }
 
-	template <typename T>
-	T* AddComponent() {
-		static_assert(std::is_base_of<Component, T>::value, "ERROR: T must inherit from Component");
-		T* newComponent = new T(true, this);
-		if (newComponent) _components.push_back(dynamic_cast<Component*>(newComponent));
-		return newComponent;
-	}
+	template <typename TComponent>
+	bool HasComponent() const { return _components.hasType<TComponent>(); }
 
-	template <typename T>
-	T* GetComponent() const {
-		for (Component* component : _components) {
-			if (T* specificComponent = dynamic_cast<T*>(component)) {
-				return specificComponent;
-			}
-		}
-		return nullptr;
-	}
+	template <typename TComponent>
+	TComponent& AddComponent() { return _components.emplace<TComponent>(this); }
 
-	template <typename T>
-	bool HasComponent() const {
-		for (Component* component : _components) {
-			if (dynamic_cast<T*>(component)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	template <typename TComponent>
+	TComponent& GetComponent() { return _components.getType<TComponent>(); }
 
-	bool operator==(const GameObject& other) const;
+	template <typename TComponent>
+	const TComponent& GetComponent() const { return _components.getType<TComponent>(); }
+
+	bool operator==(const GameObject& other) const { return _name == other._name && _tag == other._tag && _active == other._active && _components.size() == other._components.size(); }
 
 protected:
 	virtual void Start() {}
@@ -63,5 +58,3 @@ protected:
 	virtual void CleanUp() {}
 	virtual void OnSceneChange() {}
 };
-
-#endif // __GAMEOBJECT_H__

@@ -88,7 +88,6 @@ void Mesh::loadToOpenGL()
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	GLCall(glBindVertexArray(0));
-	
 }
 
 void Mesh::drawModel() const
@@ -96,25 +95,24 @@ void Mesh::drawModel() const
 	GLCall(glBindVertexArray(model.get()->GetModelData().vA));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.get()->GetModelData().iBID));
 
-	getOwner()->GetComponent<Material>()->m_Shader->Bind();
+	this->owner()->GetComponent<Material>().m_Shader->Bind();
 
-	if (getOwner()->GetComponent<Material>()->m_Texture) {
-		getOwner()->GetComponent<Material>()->m_Texture->Bind();
-		getOwner()->GetComponent<Material>()->m_Shader->SetUniformBool("u_HasTexture", true);
-		getOwner()->GetComponent<Material>()->m_Shader->SetUniform1i("u_Texture", 0);
+	if (this->owner()->GetComponent<Material>().m_Texture) {
+		this->owner()->GetComponent<Material>().m_Texture->Bind();
+		this->owner()->GetComponent<Material>().m_Shader->SetUniformBool("u_HasTexture", true);
+		this->owner()->GetComponent<Material>().m_Shader->SetUniform1i("u_Texture", 0);
 	}
 	else {
-		getOwner()->GetComponent<Material>()->m_Shader->SetUniformBool("u_HasTexture", false);
+		this->owner()->GetComponent<Material>().m_Shader->SetUniformBool("u_HasTexture", false);
 	}
-
-	getOwner()->GetComponent<Material>()->m_Shader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
+	this->owner()->GetComponent<Material>().m_Shader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>().projection()* (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>().view()* (glm::mat4)owner()->GetComponent<Transform>().glob_mat());
 
 	glDrawElements(GL_TRIANGLES, model.get()->GetModelData().indexData.size(), GL_UNSIGNED_INT, nullptr);
 
-	getOwner()->GetComponent<Material>()->m_Shader->UnBind();
+	this->owner()->GetComponent<Material>().m_Shader->UnBind();
 
-	if (getOwner()->GetComponent<Material>()->m_Texture) {
-		getOwner()->GetComponent<Material>()->m_Texture->Unbind();
+	if (this->owner()->GetComponent<Material>().m_Texture) {
+		this->owner()->GetComponent<Material>().m_Texture->Unbind();
 	}
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
@@ -194,7 +192,7 @@ void Mesh::draw() const {
 void Mesh::drawNormals() const
 {
 	m_NormalLinesShader->Bind();
-	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
+	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>().projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>().view() * (glm::mat4) owner()->GetComponent<Transform>().glob_mat());
 	m_NormalLinesShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// Enlaza el VBO de las líneas de normales
@@ -247,7 +245,7 @@ void Mesh::loadFaceNormalsToOpenGL()
 
 void Mesh::drawFaceNormals() const {
 	m_NormalLinesShader->Bind();
-	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>()->view() * (glm::mat4)getOwner()->GetComponent<Transform>()->glob_mat());
+	m_NormalLinesShader->SetUniformMat4f("u_MVP", (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>().projection() * (glm::mat4)Engine::Instance().scene->camera()->GetComponent<Camera>().view() * (glm::mat4) owner()->GetComponent<Transform>().glob_mat());
 	m_NormalLinesShader->SetUniform4f("u_Color", 0.0f, 0.0f, 1.0f, 1.0f);
 
 	// Enlaza el VBO de las líneas de normales por cara

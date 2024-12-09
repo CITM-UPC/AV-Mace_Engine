@@ -25,11 +25,11 @@ bool PanelHierarchy::Draw()
    ImGui::Begin("Hierarchy", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
    if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()) {
-	   SetSelectedGameObject(nullptr); 
+       SetSelectedGameObject(nullptr);
    }
    
-   for (const std::shared_ptr<GameObject>& gameObjectPtr : Engine::Instance().scene->root()->children()) {
-	   DrawGameObjectTree(gameObjectPtr.get());
+   for (auto& gameObjectPtr : Engine::Instance().scene->root()->children()) {
+	   DrawGameObjectTree(gameObjectPtr);
    }
 
    if (ImGui::IsMouseClicked(3) && ImGui::IsWindowHovered()) {
@@ -76,17 +76,17 @@ bool PanelHierarchy::Draw()
    return true;
 }
 
-void PanelHierarchy::DrawGameObjectTree(GameObject* gameObject)
+void PanelHierarchy::DrawGameObjectTree(GameObject& gameObject)
 {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-	if (selectedGameObject() == gameObject) flags |= ImGuiTreeNodeFlags_Selected;
+	if (selectedGameObject() == &gameObject) flags |= ImGuiTreeNodeFlags_Selected;
 
-	bool isNodeOpen = ImGui::TreeNodeEx(gameObject->name().c_str(), flags);
-	if (ImGui::IsItemClicked()) SetSelectedGameObject(gameObject);
+	bool isNodeOpen = ImGui::TreeNodeEx(gameObject.name().c_str(), flags);
+	if (ImGui::IsItemClicked()) SetSelectedGameObject(&gameObject);
 
 	if (isNodeOpen) {
-		for (const std::shared_ptr<GameObject>& childObjectPtr : gameObject->children()) {
-			DrawGameObjectTree(childObjectPtr.get());
+		for (auto& childObjectPtr : gameObject.children()) {
+			DrawGameObjectTree(childObjectPtr);
 		}
 		ImGui::TreePop();
 	}

@@ -11,8 +11,7 @@ class Camera : public Component
 	float _speed = 10.0f;
 
 public:
-	Camera(bool active, GameObject* owner) : Component(active, owner) {}
-	~Camera() {}
+	explicit Camera(GameObject* owner) : Component(owner) {}
 
 	const double fov() const { return _fov; };
 	const double aspect() const { return _aspect; };
