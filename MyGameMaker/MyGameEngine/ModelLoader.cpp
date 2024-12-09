@@ -365,7 +365,7 @@ static void createMeshesFromFBX(const aiScene& scene, std::vector<std::shared_pt
 		aiMesh* mesh = scene.mMeshes[i];
 		modelsData[i] = std::make_shared<ModelData>();
 		models[i] = std::make_shared<Model>();
-		models[i]->SetMeshName(mesh->mName.C_Str());
+		//models[i]->SetMeshName(mesh->mName.data);
 		models[i]->SetMaterialIndex(mesh->mMaterialIndex);
 
 		for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
@@ -443,33 +443,32 @@ static mat4 aiMat4ToMat4(const aiMatrix4x4& aiMat) {
 	return mat;
 }
 
-std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<shared_ptr<Material>>& materials) {
-
-	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>("scene.mName.C_Str()");
-
-	obj->GetComponent<Transform>()->mat() = aiMat4ToMat4(node.mTransformation);
-	obj->GetComponent<Transform>()->updateGlobalMatrix();
+GameObject gameObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<shared_ptr<Material>>& materials) 
+{
+	GameObject obj = GameObject(node.mName.data);
+	obj.GetComponent<Transform>().mat() = aiMat4ToMat4(node.mTransformation);
+	obj.GetComponent<Transform>().updateGlobalMatrix();
 
 	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
 		const auto meshIndex = node.mMeshes[i];
 		const auto materialIndex = meshes[meshIndex].get()->GetMaterialIndex();
-		obj->name() = meshes[meshIndex].get()->GetMeshName();
-		obj->AddComponent<Mesh>();
-		obj->GetComponent<Mesh>()->setModel(meshes[meshIndex]);
-		obj->AddComponent<Material>();
-		obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[materialIndex]->m_TexturePath);
-		obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-		obj->GetComponent<Mesh>()->loadToOpenGL();
+		//obj.name() = meshes[meshIndex].get()->GetMeshName();
+		obj.AddComponent<Mesh>();
+		obj.GetComponent<Mesh>().setModel(meshes[meshIndex]);
+		obj.AddComponent<Material>();
+		obj.GetComponent<Material>().m_Texture = std::make_unique<Texture>(materials[materialIndex]->m_TexturePath);
+		obj.GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+		obj.GetComponent<Mesh>().loadToOpenGL();
 	}
 
 	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-		obj->addChild(graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials));
+		obj.emplaceChild(gameObjectFromNode(scene, *node.mChildren[i], meshes, materials));
 	}
 
 	return obj;
 }
 
-std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filename)
+GameObject ModelLoader::loadFromFile(const std::string& filename)
 {
 	const aiScene* scene = aiImportFile(filename.c_str(),
 		aiProcess_CalcTangentSpace |
@@ -483,16 +482,17 @@ std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filenam
 	// If the import failed, report it
 	if (nullptr == scene) {
 		LOG(LogType::LOG_WARNING, "Couldn't find %s", filename.c_str());
-		return nullptr;
+		aiReleaseImport(scene);
+		return GameObject();
 	}
 	else {
 		std::vector<std::shared_ptr<Model>> models;
 		createMeshesFromFBX(*scene, models);
 		std::vector<std::shared_ptr<Material>> materials;
 		createMaterialsFromFBX(*scene, std::filesystem::absolute(filename).parent_path(), materials);
-		std::shared_ptr<GameObject> fbx_obj = graphicObjectFromNode(*scene, *scene->mRootNode, models, materials);
+		GameObject fbx_obj = gameObjectFromNode(*scene, *scene->mRootNode, models, materials);
 		aiReleaseImport(scene);
-		fbx_obj->name() = std::filesystem::path(filename).stem().string();
+		//fbx_obj.name() = std::filesystem::path(filename).stem().string();
 		return fbx_obj;
 	}
 }

@@ -206,13 +206,13 @@ bool PanelMenu::Draw()
                 if (ImGui::Checkbox("Vertex Normals", &showPerTriangleNormals)) {
                     for (auto& child : Engine::Instance().scene->root()->children())
                     {
-                        //child->GetComponent<Mesh>()->setDebugNormals(showPerTriangleNormals);
+                        //child->GetComponent<Mesh>().setDebugNormals(showPerTriangleNormals);
                     }
                 }
                 if (ImGui::Checkbox("Face Normals", &showPerFaceNormals)) {
                     for (auto& child : Engine::Instance().scene->root()->children())
                     {
-                        //child->GetComponent<Mesh>()->setDebugFaceNormals(showPerFaceNormals);
+                        //child->GetComponent<Mesh>().setDebugFaceNormals(showPerFaceNormals);
                     }
                 }
                 ImGui::EndMenu();
