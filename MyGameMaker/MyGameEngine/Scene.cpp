@@ -282,8 +282,6 @@ void Scene::Draw(GameObject* root)
 	}
 
 	drawDebugInfoForGraphicObject(*root);
-	//BoundingBox parent = DebugParentBB(*root);
-	//drawBoundingBox(parent);
 }
 
 void Scene::loadGameObjectByPath(const std::string& path)

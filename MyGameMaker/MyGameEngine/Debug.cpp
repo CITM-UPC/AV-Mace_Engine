@@ -59,16 +59,17 @@ static void drawBoundingBox(const BoundingBox& bbox) {
 	drawWiredQuad(bbox.v001(), bbox.v011(), bbox.v111(), bbox.v101());
 }
 
-void drawDebugInfoForGraphicObject(const GameObject& obj, bool good, BoundingBox parentbbox) {
+BoundingBox parentbbox;
+
+void drawDebugInfoForGraphicObject(const GameObject& obj, bool good) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
 	glMultMatrixd(obj.GetComponent<Transform>()->data());
 	drawAxis(0.5);
 	BoundingBox bbox;
+	bbox = obj.getBoundingBox();
 	if (obj.HasComponent<Mesh>() && good) {
 		glColor3ub(0, 255, 255);
-		bbox = obj.getBoundingBox();
-		parentbbox = bbox + parentbbox;
 		drawBoundingBox(bbox);
 	}
 	else {
@@ -78,20 +79,22 @@ void drawDebugInfoForGraphicObject(const GameObject& obj, bool good, BoundingBox
 			run = true;
 		}
 		for (const auto& child : obj.children()) {
-			drawDebugInfoForGraphicObject(*child, run, parentbbox);
+			if (!child->HasComponent<Mesh>()) {
+				parentbbox = bbox + parentbbox;
+			}
+			drawDebugInfoForGraphicObject(*child, run);
 		}
 	}
 
-
-	//temp not working
-	if (obj.children().empty()) {
+	if (!obj.hasParent()) {
+		glColor3ub(255, 255, 0);
 		drawBoundingBox(parentbbox);
+		parentbbox = BoundingBox();
 	}
-
-	glColor3ub(255, 255, 0);
 
 	glPopMatrix();
 }
+
 /*
 void drawSegment(const Segment& s) {
 	glLineWidth(4.0);
