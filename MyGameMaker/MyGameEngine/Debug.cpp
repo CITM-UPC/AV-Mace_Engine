@@ -1,9 +1,14 @@
 #include "Debug.h"
+#include "Engine.h"
+#include "Scene.h"
 #include "GameObject.h"
 #include "Mesh.h"
 #include "Transform.h"
 #include <GL/glew.h>
+#include <iostream>
 #include <imgui.h>
+#include <assimp/types.h>
+#include <ranges>
 
 inline static void glVertex3(const vec3& v) { glVertex3dv(&v.x); }
 
@@ -54,27 +59,36 @@ static void drawBoundingBox(const BoundingBox& bbox) {
 	drawWiredQuad(bbox.v001(), bbox.v011(), bbox.v111(), bbox.v101());
 }
 
-void drawDebugInfoForGraphicObject(const GameObject& obj) {
+void drawDebugInfoForGraphicObject(const GameObject& obj, bool good, BoundingBox parentbbox) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
 	glMultMatrixd(obj.GetComponent<Transform>()->data());
 	drawAxis(0.5);
-	glColor3ub(0, 255, 255);
 	BoundingBox bbox;
-	BoundingBox parentbbox;
-	for (const auto& child : obj.children()) {
-		if (child->HasComponent<Mesh>()) {
-			bbox = child->getBoundingBox();
-			parentbbox = bbox + parentbbox;
-			drawBoundingBox(bbox);
+	if (obj.HasComponent<Mesh>() && good) {
+		glColor3ub(0, 255, 255);
+		bbox = obj.getBoundingBox();
+		parentbbox = bbox + parentbbox;
+		drawBoundingBox(bbox);
+	}
+	else {
+		//Run means it's the first transformation, meaning all transformations are applied and the drawing is in place.
+		bool run = good;
+		if (obj.parent() == Engine::Instance().scene->root()) {
+			run = true;
+		}
+		for (const auto& child : obj.children()) {
+			drawDebugInfoForGraphicObject(*child, run, parentbbox);
 		}
 	}
-	glColor3ub(255, 255, 0);
-	if (obj.hasParent()) {
+
+
+	//temp not working
+	if (obj.children().empty()) {
 		drawBoundingBox(parentbbox);
 	}
-	for (const auto& child : obj.children()) drawDebugInfoForGraphicObject(*child);
-	
+
+	glColor3ub(255, 255, 0);
 
 	glPopMatrix();
 }

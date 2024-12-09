@@ -42,11 +42,11 @@ void Scene::Start()
 	ModelLoader loader;
 	// Specify the paths for the FBX file and the custom format file
 	std::string fbxFilePath = "Assets/street2.FBX";
-	std::string customFilePath = "Library/Models/BakerHouse.model";
+	std::string customFilePath = "Library/Models/street.model";
 
 	// Save the FBX file to the custom format
 	loader.saveFBXToCustomFormat(fbxFilePath, customFilePath);
-	//std::shared_ptr<GameObject> sceneobj = loader.loadFromFile("BakerHouse");
+	//std::shared_ptr<GameObject> sceneobj = loader.loadFromFile("street");
 	std::shared_ptr<GameObject> sceneobj = loader.loadFromFile(fbxFilePath);
 	root()->addChild(sceneobj);
 	root()->GetComponent<Transform>()->updateGlobalMatrix();
@@ -265,9 +265,9 @@ void Scene::Draw(GameObject* root)
 	for (auto& child : root->children())
 	{
 		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
-			glm::dmat4 projectionMatrix = camera()->GetComponent<Camera>()->projection();
-			Frustum frustum;
-			BoundingBox boundingBox = child->getBoundingBox();
+			//glm::dmat4 projectionMatrix = camera()->GetComponent<Camera>()->projection();
+			//Frustum frustum;
+			//BoundingBox boundingBox = child->getBoundingBox();
 			child->GetComponent<Mesh>()->drawModel();
 			//frustum.setFrustumPlanes(projectionMatrix);
 			/*if (frustum.isBoundingBoxInFrustum(boundingBox)) {
@@ -282,6 +282,8 @@ void Scene::Draw(GameObject* root)
 	}
 
 	drawDebugInfoForGraphicObject(*root);
+	//BoundingBox parent = DebugParentBB(*root);
+	//drawBoundingBox(parent);
 }
 
 void Scene::loadGameObjectByPath(const std::string& path)

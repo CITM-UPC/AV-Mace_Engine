@@ -14,6 +14,9 @@ public:
 	auto cbegin() const { return _list.cbegin(); }
 	auto cend() const { return _list.cend(); }
 
+	auto rbegin() const { return _list.rbegin(); }
+	auto rend() const { return _list.rend(); }
+
 	auto& front() const { return const_cast<T&>(_list.front()); }
 	auto& back() const { return const_cast<T&>(_list.back()); }
 
