@@ -59,6 +59,7 @@ public:
 	}
 
 	bool operator==(const GameObject& other) const;
+	bool operator!=(const GameObject& other) const;
 
 	// Métodos para la Bounding Box
 	const BoundingBox& getBoundingBox() const;

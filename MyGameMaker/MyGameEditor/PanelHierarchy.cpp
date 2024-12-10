@@ -10,7 +10,7 @@
 #include "PanelInspector.h"
 #include "MyGameEngine/Log.h"
 
-PanelHierarchy::PanelHierarchy(std::string name) : Panel(name, WINDOW_WIDTH * 0.15, WINDOW_HEIGHT - 219)
+PanelHierarchy::PanelHierarchy(std::string name) : Panel(name, WINDOW_WIDTH * 0.2, WINDOW_HEIGHT - 219)
 {
 	SwitchState();
 }
@@ -24,44 +24,70 @@ bool PanelHierarchy::Draw()
 
    ImGui::Begin("Hierarchy", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-   if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()) {
-	   SetSelectedGameObject(nullptr); 
-   }
+   if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()) {  SetSelectedGameObject(nullptr);  }
    
+   ImGui::BeginChild("HierarchyRoot", ImVec2(0, 0), true);
+
    for (const std::shared_ptr<GameObject>& gameObjectPtr : Engine::Instance().scene->root()->children()) {
 	   DrawGameObjectTree(gameObjectPtr.get());
    }
 
-   if (ImGui::IsMouseClicked(3) && ImGui::IsWindowHovered()) {
+   // Updated drop target handling
+   if (ImGui::BeginDragDropTarget()) 
+   {
+       if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GAMEOBJECT_DRAG")) 
+       {
+           IM_ASSERT(payload->DataSize == sizeof(GameObject*));
+           GameObject* draggedObject = *static_cast<GameObject**>(payload->Data);
+
+           if (draggedObject) {
+               GameObject* root = Engine::Instance().scene->root();
+               // Compare pointers directly now that parent() returns a pointer
+               if (draggedObject->parent() != root) { draggedObject->setParent(root); }
+           }
+       }
+       ImGui::EndDragDropTarget();
+   }
+
+   ImGui::EndChild();
+
+   // Right-click context menu
+   if (ImGui::IsMouseClicked(1) && ImGui::IsWindowHovered()) {
        ImGui::OpenPopup("CreateGameObjectPopup");
-       LOG(LogType::LOG_INFO, "Open Popup");
    }
 
    // Create GameObjects Popup
-   if (ImGui::BeginPopup("CreateGameObjectPopup"))
+   if (ImGui::BeginPopup("CreateGameObjectPopup")) 
    {
        LOG(LogType::LOG_INFO, "Popup Called");
-       ImGui::Selectable("Cut", false);
-       ImGui::Selectable("Copy", false);
-       ImGui::Selectable("Paste", false);
-       ImGui::Selectable("Paste As Child", false);
-       ImGui::Separator();
-       ImGui::Selectable("Rename", "F2", false);
-       ImGui::Selectable("Duplicate", "Ctrl+D", false);
-       ImGui::Selectable("Delete", "Del", false);
-       ImGui::Separator();
-       ImGui::Selectable("Select Children", false);
-       ImGui::Separator();
-       ImGui::Selectable("Create Empty", false);
-       if (ImGui::BeginMenu("Primitives")) {
-           // Add items here
-           ImGui::EndMenu();
-       }
+	   if (ImGui::MenuItem("Cut")) {
 
-       if (ImGui::BeginMenu("Material")) {
-           // Add items here
-           ImGui::EndMenu();
+	   }
+       if (ImGui::MenuItem("Copy")) {
+
+	   }
+       if (ImGui::MenuItem("Paste")) {
        }
+	   if (ImGui::MenuItem("Paste As Child")) {
+	   }
+	   ImGui::Separator();
+	   if (ImGui::MenuItem("Rename")) {
+	   }
+	   if (ImGui::MenuItem("Duplicate")) {
+	   }
+	   if (ImGui::MenuItem("Delete")) {
+	   }
+	   ImGui::Separator();
+	   if (ImGui::MenuItem("Select Children")) {
+	   }
+	   ImGui::Separator();
+       if (ImGui::MenuItem("Create Empty")) {
+           Engine::Instance().scene->CreateGameObject();
+       }
+	   if (ImGui::BeginMenu("Primitives")) {
+	   }
+	   if (ImGui::BeginMenu("Material")) {
+	   }
        ImGui::EndPopup();
    }
 
