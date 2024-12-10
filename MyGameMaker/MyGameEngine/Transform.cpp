@@ -51,7 +51,7 @@ void Transform::updateGlobalMatrix()
         {
             //current->getOwner()->parent().hasParent()
             if (current->getOwner()->hasParent()) {
-                current->global_mat = current->getOwner()->parent().GetComponent<Transform>()->glob_mat() * current->local_mat;
+                current->global_mat = current->getOwner()->parent()->GetComponent<Transform>()->glob_mat() * current->local_mat;
             }
             else {
                 current->global_mat = current->local_mat;

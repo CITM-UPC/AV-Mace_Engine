@@ -24,9 +24,7 @@ bool PanelHierarchy::Draw()
 
    ImGui::Begin("Hierarchy", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-   if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()) {  SetSelectedGameObject(nullptr);  }
-   
-   ImGui::BeginChild("HierarchyRoot", ImVec2(0, 0), true);
+   if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()) SetSelectedGameObject(nullptr);
 
    for (const std::shared_ptr<GameObject>& gameObjectPtr : Engine::Instance().scene->root()->children()) {
 	   DrawGameObjectTree(gameObjectPtr.get());
@@ -43,13 +41,13 @@ bool PanelHierarchy::Draw()
            if (draggedObject) {
                GameObject* root = Engine::Instance().scene->root();
                // Compare pointers directly now that parent() returns a pointer
-               if (draggedObject->parent() != root) { draggedObject->setParent(root); }
+			   if (draggedObject->parent() != root) {
+				   draggedObject->reparent(root);
+			   }
            }
        }
        ImGui::EndDragDropTarget();
    }
-
-   ImGui::EndChild();
 
    // Right-click context menu
    if (ImGui::IsMouseClicked(1) && ImGui::IsWindowHovered()) {
@@ -104,15 +102,51 @@ bool PanelHierarchy::Draw()
 
 void PanelHierarchy::DrawGameObjectTree(GameObject* gameObject)
 {
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+	if (!gameObject) return;
+
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
+		ImGuiTreeNodeFlags_OpenOnDoubleClick |
+		ImGuiTreeNodeFlags_SpanAvailWidth;
+
 	if (selectedGameObject() == gameObject) flags |= ImGuiTreeNodeFlags_Selected;
+	if (gameObject->children().empty())	flags |= ImGuiTreeNodeFlags_Leaf;
+
+	// Add drag source identifier
+	char uniqueLabel[256];
+	const size_t labelSize = sizeof(uniqueLabel);
+	int result = sprintf_s(uniqueLabel, labelSize, "%s##%p", gameObject->name().c_str(), static_cast<void*>(gameObject));
+	if (result < 0) strcpy_s(uniqueLabel, labelSize, gameObject->name().c_str());
 
 	bool isNodeOpen = ImGui::TreeNodeEx(gameObject->name().c_str(), flags);
 	if (ImGui::IsItemClicked()) SetSelectedGameObject(gameObject);
 
+	// Begin drag source
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+		// Store pointer to dragged object
+		ImGui::SetDragDropPayload("GAMEOBJECT_DRAG", &gameObject, sizeof(GameObject*));
+
+		// Show preview text
+		ImGui::Text("Moving %s", gameObject->name().c_str());
+		ImGui::EndDragDropSource();
+	}
+	// Handle drop target (for parenting to this object)
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GAMEOBJECT_DRAG")) {
+			IM_ASSERT(payload->DataSize == sizeof(GameObject*));
+			GameObject* draggedObject = *static_cast<GameObject**>(payload->Data);
+
+			if (draggedObject && draggedObject != gameObject) {
+				draggedObject->reparent(gameObject);
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	if (isNodeOpen) {
-		for (const std::shared_ptr<GameObject>& childObjectPtr : gameObject->children()) {
-			DrawGameObjectTree(childObjectPtr.get());
+		auto children = gameObject->children();
+		for (const auto& child : children) 
+		{
+			if (child) DrawGameObjectTree(child.get());
 		}
 		ImGui::TreePop();
 	}
