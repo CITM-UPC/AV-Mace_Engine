@@ -21,10 +21,19 @@ void MyGUI::Awake(SDL_Window* window, void* context)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+
 	ImGui::StyleColorsDark();
+
+	// Ensure ImGui is initialized correctly for SDL and OpenGL
 	ImGui_ImplSDL2_InitForOpenGL(window, context);
 	ImGui_ImplOpenGL3_Init();
 
+	// Set this flag to prevent dock splitting behavior
+	//io.ConfigDockingNoSplit = true;
+
+	// Create panels
 	_console = new PanelConsole("Console");
 	_menu = new PanelMenu("Menu");
 	_inspector = new PanelInspector("Inspector");
@@ -44,12 +53,25 @@ void MyGUI::render() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
-	
+
+	/* Create a Dockspace window
+	ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+
+	ImGui::Begin("Dockspace", nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+	ImGuiID dockspace_id = ImGui::GetID("MainDockspace");
+	ImGui::DockSpace(dockspace_id);
+
+	ImGui::End();
+
+	 Render all the panels*/
 	for (const auto& panel : _panels)
 	{
 		if (panel->GetState() == false)
 			continue;
-		
+
 		panel->Draw();
 	}
 

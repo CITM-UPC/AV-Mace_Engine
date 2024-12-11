@@ -23,32 +23,33 @@ bool PanelInspector::Draw()
 	ImGui::SetNextWindowSize(ImVec2(width, Engine::Instance().window->height() - 200));
 	ImGui::SetNextWindowPos(ImVec2(Engine::Instance().window->width() - width, 0));
 
-    if (auto* selectedGameObject = MyGUI::Instance().hierarchy().selectedGameObject())
-    {
-        ImGui::Begin("Inspector", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    auto* selectedGameObject = MyGUI::Instance().hierarchy().selectedGameObject();
+    ImGui::Begin("Inspector", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
+    if (selectedGameObject != nullptr)
+    {
         DrawGameObjectControls(selectedGameObject);
         if (selectedGameObject->HasComponent<Transform>())  DrawTransformControls(selectedGameObject);
         if (selectedGameObject->HasComponent<Mesh>())       DrawMeshControls(selectedGameObject);
         if (selectedGameObject->HasComponent<Material>())   DrawMaterialControls(selectedGameObject);
-		if (selectedGameObject->HasComponent<Camera>())     DrawCameraControls(selectedGameObject);
-		ImGui::Text(" ");
+        if (selectedGameObject->HasComponent<Camera>())     DrawCameraControls(selectedGameObject);
+        ImGui::Text(" ");
 
-		// Add Component
+        // Add Component
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 180) * 0.5f);
         if (ImGui::Button("Add Component", ImVec2(200.0f, 25.0))) ImGui::OpenPopup("AddComponentPopup");
         if (ImGui::BeginPopup("AddComponentPopup"))
         {
             ImGui::Text("Select Component to Add:");
-			ImGui::Separator();
+            ImGui::Separator();
 
             for (auto& componentName : componentOptions)
             {
-				bool isDisabled = false;
+                bool isDisabled = false;
                 if (componentName == "Transform" && selectedGameObject->HasComponent<Transform>())    isDisabled = true;
                 //else if (componentName == "Mesh" && selectedGameObject->HasComponent<Mesh>())         isDisabled = true;
                 else if (componentName == "Material" && selectedGameObject->HasComponent<Material>()) isDisabled = true;
-				else if (componentName == "Camera" && selectedGameObject->HasComponent<Camera>())     isDisabled = true;
+                else if (componentName == "Camera" && selectedGameObject->HasComponent<Camera>())     isDisabled = true;
 
                 if (isDisabled) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f)); // Dimmed text color
@@ -58,9 +59,9 @@ bool PanelInspector::Draw()
                 if (ImGui::Selectable(componentName.c_str(), false, isDisabled ? ImGuiSelectableFlags_Disabled : 0))
                 {
                     if (componentName == "Transform" && !selectedGameObject->HasComponent<Transform>())       selectedGameObject->AddComponent<Transform>();
-					//else if (componentName == "Mesh" && selectedGameObject->HasComponent<Mesh>())            selectedGameObject->AddComponent<Mesh>();
-					else if (componentName == "Material" && !selectedGameObject->HasComponent<Material>())    selectedGameObject->AddComponent<Material>();
-					else if (componentName == "Camera" && !selectedGameObject->HasComponent<Camera>())        selectedGameObject->AddComponent<Camera>();
+                    //else if (componentName == "Mesh" && selectedGameObject->HasComponent<Mesh>())            selectedGameObject->AddComponent<Mesh>();
+                    else if (componentName == "Material" && !selectedGameObject->HasComponent<Material>())    selectedGameObject->AddComponent<Material>();
+                    else if (componentName == "Camera" && !selectedGameObject->HasComponent<Camera>())        selectedGameObject->AddComponent<Camera>();
                 }
 
                 if (isDisabled) {
@@ -70,8 +71,8 @@ bool PanelInspector::Draw()
             }
             ImGui::EndPopup();
         }
-        ImGui::End();
     }
+    ImGui::End();
 
     if (!showWindow) {
         Engine::Instance().input->ActivateTextInput(false);
@@ -90,7 +91,11 @@ void PanelInspector::DrawGameObjectControls(GameObject* gameObject)
     // Name input
     ImGui::SetNextItemWidth(160.0f);
     char buffer[128] = {};
-    strncpy_s(buffer, gameObject->name().c_str(), sizeof(buffer));
+    if (gameObject->name().length() < sizeof(buffer)) {
+        strncpy_s(buffer, gameObject->name().c_str(), sizeof(buffer) - 1);
+    }
+    else LOG(LogType::LOG_WARNING, "ERROR: Name is to long");
+
 	if (ImGui::InputText("##gameobject_name", buffer, sizeof(buffer), ImGuiInputTextFlags_None))
     {
 		if (ImGui::IsItemDeactivatedAfterEdit()) {
@@ -105,14 +110,17 @@ void PanelInspector::DrawGameObjectControls(GameObject* gameObject)
     ImGui::Text("Tag");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(100.0f);
-    if (ImGui::BeginCombo("##tag", gameObject->tag().c_str())) {
-        for (const auto& option : tagOptions) {
-            if (ImGui::Selectable(option.c_str(), gameObject->tag() == option)) {
-                gameObject->tag() = option;
+    if (gameObject != nullptr && !gameObject->tag().empty()) {
+        if (ImGui::BeginCombo("##tag", gameObject->tag().c_str())) {
+            for (const auto& option : tagOptions) {
+                if (ImGui::Selectable(option.c_str(), gameObject->tag() == option)) {
+                    gameObject->tag() = option;
+                }
             }
+            ImGui::EndCombo();
         }
-        ImGui::EndCombo();
     }
+	else LOG(LogType::LOG_WARNING, "ERROR: GameObject is null");
 	ImGui::SameLine();
 
     // Layer selection

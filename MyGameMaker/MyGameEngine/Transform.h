@@ -76,6 +76,7 @@ public:
 	Transform() = default;
 	Transform(const mat4& mat);
 	Transform(bool active, GameObject* owner);
+	~Transform() = default;
 	Transform operator*(const mat4& other) { return Transform(local_mat * other); }
 	Transform operator*(const Transform& other) { return Transform(local_mat * other.local_mat); }
 };

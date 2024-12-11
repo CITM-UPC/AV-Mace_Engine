@@ -13,7 +13,10 @@ class Component
 public:
 	Component() : _active(true), _owner(nullptr) {}
 	Component(bool active, GameObject* owner) : _active(active), _owner(owner)  {}
-	virtual ~Component() = default;
+	virtual ~Component() {
+		_owner = nullptr; // Remove association with the owner.
+		_active = false;  // Mark as inactive to indicate cleanup.
+	}
 
 	GameObject* getOwner() const { return _owner; }
 	auto& isActive() { return _active; }

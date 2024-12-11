@@ -19,8 +19,9 @@ public:
         _parent = parent; 
         return *static_cast<T*>(this);
     }
-
+    
     auto children() const { return readOnlyListView<std::shared_ptr<T>>(_children); }  // Devuelve vista solo lectura de punteros compartidos
+	auto& children() { return _children; }
 
     auto& addChild(const std::shared_ptr<T>& child) {
         child->setParent(static_cast<T*>(this));

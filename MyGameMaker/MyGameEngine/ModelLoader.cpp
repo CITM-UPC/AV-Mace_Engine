@@ -502,6 +502,7 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 			obj->AddComponent<Mesh>();
 			obj->GetComponent<Mesh>()->setModel(mesh);
+			obj->GetComponent<Mesh>()->setFilePath(mesh->GetMeshName());
 			obj->AddComponent<Material>();
 			obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]->m_TexturePath);
 			obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");

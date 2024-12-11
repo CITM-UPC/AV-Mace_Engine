@@ -1,5 +1,3 @@
-#ifndef __GAMEOBJECT_H__
-#define __GAMEOBJECT_H__
 #pragma once
 
 #include <string>
@@ -21,7 +19,7 @@ class GameObject : public TreeExtension<GameObject>
 
 public:
 	GameObject(const std::string& name, const std::string& tag = "Untagged", bool active = true);
-	~GameObject() {}
+	~GameObject() { Delete(); }
 
 	auto& name() { return _name; }
 	auto& tag() { return _tag; }
@@ -58,6 +56,15 @@ public:
 		return false;
 	}
 
+	void Delete() {
+		_active = false;
+		//for (auto& component : _components); //delete component;
+		//_components.clear();
+		for (auto& child : children()) child->Delete();
+		children().clear();
+		unparent();
+	}
+
 	bool operator==(const GameObject& other) const;
 	bool operator!=(const GameObject& other) const;
 
@@ -71,5 +78,3 @@ protected:
 	virtual void CleanUp() {}
 	virtual void OnSceneChange() {}
 };
-
-#endif // __GAMEOBJECT_H__

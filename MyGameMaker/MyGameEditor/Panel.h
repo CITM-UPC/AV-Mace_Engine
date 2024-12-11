@@ -29,8 +29,9 @@ public:
 	int getWidth() { return width; }
 	int getHeight() { return height; }
 
-protected:
+	bool isActiveTab = false;
 
+protected:
 	std::string name;
 	bool enabled = false;
 	int width, height;
