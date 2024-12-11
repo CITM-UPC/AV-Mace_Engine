@@ -116,9 +116,13 @@ void PanelHierarchy::DrawGameObjectTree(GameObject* gameObject)
 	const size_t labelSize = sizeof(uniqueLabel);
 	int result = sprintf_s(uniqueLabel, labelSize, "%s##%p", gameObject->name().c_str(), static_cast<void*>(gameObject));
 	if (result < 0) strcpy_s(uniqueLabel, labelSize, gameObject->name().c_str());
-
 	bool isNodeOpen = ImGui::TreeNodeEx(gameObject->name().c_str(), flags);
-	if (ImGui::IsItemClicked()) SetSelectedGameObject(gameObject);
+	if (ImGui::IsItemClicked()) {
+		SetSelectedGameObject(gameObject);
+	}
+	else {
+		SetSelectedGameObject(Engine::Instance().scene->selectedGameObject);
+	}
 
 	// Begin drag source
 	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {

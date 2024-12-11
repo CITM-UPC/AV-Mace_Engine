@@ -1,44 +1,27 @@
 #include "Frustum.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
 
-// Helper function to create a plane from the view-projection matrix
-Plane createPlaneFromMatrix(const glm::dmat4& matrix, int row) {
-    // Extract the row corresponding to the plane coefficients
-    glm::dvec4 rowVec = matrix[row];
-    vec3 normal = vec3(rowVec.x, rowVec.y, rowVec.z);
-    float d = rowVec.w;
+std::array<glm::vec3, 8> Frustum::calculateFrustumCorners(const Camera& camera) {
+    glm::mat4 viewProj = camera.projection() * camera.view();
+    glm::mat4 invViewProj = glm::inverse(viewProj);
 
-    // Assuming the plane passes through the origin
-    return Plane(Point(vec3(0.0f)), Vector(normal));
-}
+    // Clip space corners
+    std::array<glm::vec4, 8> clipSpaceCorners = {
+        glm::vec4(-1, -1, -1, 1), glm::vec4(1, -1, -1, 1),
+        glm::vec4(1, 1, -1, 1),   glm::vec4(-1, 1, -1, 1),
+        glm::vec4(-1, -1, 1, 1),  glm::vec4(1, -1, 1, 1),
+        glm::vec4(1, 1, 1, 1),    glm::vec4(-1, 1, 1, 1),
+    };
 
-void Frustum::setFrustumPlanes(const glm::dmat4& viewProjMatrix) {
-    // Extract the six planes from the view-projection matrix
-    planes[0] = createPlaneFromMatrix(viewProjMatrix, 0); // Left plane
-    planes[1] = createPlaneFromMatrix(viewProjMatrix, 1); // Right plane
-    planes[2] = createPlaneFromMatrix(viewProjMatrix, 2); // Top plane
-    planes[3] = createPlaneFromMatrix(viewProjMatrix, 3); // Bottom plane
-    //planes[4] = createPlaneFromMatrix(viewProjMatrix, 4); // Near plane
-    //planes[5] = createPlaneFromMatrix(viewProjMatrix, 5); // Far plane
-}
-
-bool Frustum::isBoundingBoxInFrustum(const BoundingBox& bbox) const {
-    for (const auto& plane : planes) {
-        bool allOutside = true;
-        for (const auto& vertex : bbox.vertices()) {
-            float distance = glm::dot(plane.normal.v, vertex - plane.origin.p);
-            if (distance >= 0) {
-                // If any vertex is in front of or on the plane, the box is not entirely outside
-                allOutside = false;
-                break;
-            }
-        }
-        if (allOutside) {
-            // If all vertices are outside the plane, the bounding box is culled
-            return false;
-        }
+    // Transform to world space
+    std::array<glm::vec3, 8> worldSpaceCorners;
+    for (size_t i = 0; i < 8; ++i) {
+        glm::vec4 corner = invViewProj * clipSpaceCorners[i];
+        corner /= corner.w;  // Perspective divide
+        worldSpaceCorners[i] = glm::vec3(corner);
     }
-    // If the bounding box is not culled by any plane, it's potentially visible
-    return true;
+    return worldSpaceCorners;
 }
+

@@ -189,6 +189,7 @@ bool PanelMenu::Draw()
                 if (ImGui::MenuItem("Create Camera", nullptr, nullptr)) {
                     //Engine::Instance().scene->CreateCamera();
                 }
+                ImGui::EndMenu();
             }
 			
             if (ImGui::BeginMenu("Draw Mode")) {

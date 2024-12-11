@@ -2,11 +2,13 @@
 #include "types.h"
 #include "Camera.h"
 
+
 #include <glm/glm.hpp>
 #include <memory>
 #include <iostream>
 
 #include "Engine.h"
+#include "MyWindow.h"
 #include "Log.h"
 #include "Input.h"
 #include "ModelLoader.h"
@@ -15,6 +17,7 @@
 #include "Debug.h"
 #include "BoundingBox.h"
 #include "Frustum.h"
+#include "Ray.h"
 
 //camera movement variables
 bool rightMouse = false;
@@ -243,6 +246,30 @@ void Scene::Update(double& dT)
 			LOG(LogType::LOG_WARNING, "Select an Object!");
 		}
 	}
+
+	if (Engine::Instance().input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KEY_DOWN) {
+		int mouseX, mouseY;
+		Engine::Instance().input->GetMousePosition(mouseX, mouseY);
+
+		// Screen dimensions
+		int screenWidth = Engine::Instance().window->width();
+		int screenHeight = Engine::Instance().window->height();
+
+		Ray ray = CalculatePickingRay(mouseX, mouseY, camera()->GetComponent<Camera>(), screenWidth, screenHeight);
+
+		float closestT = FLT_MAX;
+		std::shared_ptr<GameObject> closestObject = nullptr;
+
+		// Start the recursive check from the root object
+		for (auto& child : root()->children()) {
+			closestObject = CheckIntersectionRecursive(ray, child, closestT, closestObject);
+		}
+
+		if (closestObject) {
+			selectedGameObject = closestObject.get();
+			LOG(LogType::LOG_INFO, ("Selected object: " + selectedGameObject->name()).c_str());
+		}
+	}
 }
 
 void Scene::PostUpdate()
@@ -262,20 +289,11 @@ void Scene::OnSceneChange() {}
 
 void Scene::Draw(GameObject* root)
 {
+	Frustum frustum;
 	for (auto& child : root->children())
 	{
 		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
-			//glm::dmat4 projectionMatrix = camera()->GetComponent<Camera>()->projection();
-			//Frustum frustum;
-			//BoundingBox boundingBox = child->getBoundingBox();
 			child->GetComponent<Mesh>()->drawModel();
-			//frustum.setFrustumPlanes(projectionMatrix);
-			/*if (frustum.isBoundingBoxInFrustum(boundingBox)) {
-				child->GetComponent<Mesh>()->drawModel();
-			}
-			else {
-				printf("Object out of frustum\n");
-			}*/
 		}
 
 		if (!child->children().empty()) Draw(child.get());
@@ -448,4 +466,73 @@ void Scene::CreateTorus()
 
 	if (selectedGameObject == nullptr) root()->addChild(go);
 	else selectedGameObject->addChild(go);
+}
+
+Ray Scene::CalculatePickingRay(int mouseX, int mouseY, Camera* camera, int screenWidth, int screenHeight) {
+	glm::vec4 viewport(0, 0, screenWidth, screenHeight);
+
+	glm::mat4 view = glm::mat4(camera->view());
+	glm::mat4 projection = glm::mat4(camera->projection()); 
+
+	glm::vec3 nearPoint = glm::unProject(glm::vec3(mouseX, screenHeight - mouseY, 0.0f),
+		view,
+		projection,
+		viewport);
+	glm::vec3 farPoint = glm::unProject(glm::vec3(mouseX, screenHeight - mouseY, 1.0f),
+		view,
+		projection,
+		viewport);
+
+	glm::vec3 direction = glm::normalize(farPoint - nearPoint);
+	return Ray{ nearPoint, direction };
+}
+
+bool Scene::IntersectRayBox(const Ray& ray, const BoundingBox& box, float& t) {
+	float tmin = (box.min.x - ray.origin.x) / ray.direction.x;
+	float tmax = (box.max.x - ray.origin.x) / ray.direction.x;
+
+	if (tmin > tmax) std::swap(tmin, tmax);
+
+	float tymin = (box.min.y - ray.origin.y) / ray.direction.y;
+	float tymax = (box.max.y - ray.origin.y) / ray.direction.y;
+
+	if (tymin > tymax) std::swap(tymin, tymax);
+
+	if ((tmin > tymax) || (tymin > tmax)) return false;
+
+	if (tymin > tmin) tmin = tymin;
+	if (tymax < tmax) tmax = tymax;
+
+	float tzmin = (box.min.z - ray.origin.z) / ray.direction.z;
+	float tzmax = (box.max.z - ray.origin.z) / ray.direction.z;
+
+	if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax)) return false;
+
+	t = tmin;
+	return true;
+}
+
+mat4 transform = 1.0f;
+
+std::shared_ptr<GameObject>& Scene::CheckIntersectionRecursive(const Ray& ray, std::shared_ptr<GameObject> object, float& closestT, std::shared_ptr<GameObject>& closestObject) {
+	// Check the bounding box of the current object
+	transform *= object->GetComponent<Transform>()->mat();
+	BoundingBox bbox = transform * object->getBoundingBox();
+	float t;
+	if (object->HasComponent<Mesh>()) {
+		if (IntersectRayBox(ray, bbox, t) && t < closestT) {
+			closestT = t;
+			closestObject = object;
+		}
+		transform = 1.0f;
+	}
+
+	// Recursively check the children of the current object
+	for (auto& child : object->children()) {
+		CheckIntersectionRecursive(ray, child, closestT, closestObject);
+	}
+
+	return closestObject;
 }

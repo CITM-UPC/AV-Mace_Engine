@@ -149,6 +149,7 @@
     <ClInclude Include="MyWindow.h" />
     <ClInclude Include="PerfTimer.h" />
     <ClInclude Include="PolymorphList.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="readOnlyView.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
@@ -174,6 +175,7 @@
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="MyWindow.cpp" />
     <ClCompile Include="PerfTimer.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
