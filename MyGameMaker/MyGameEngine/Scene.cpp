@@ -269,6 +269,10 @@ void Scene::Update(double& dT)
 			selectedGameObject = closestObject.get();
 			LOG(LogType::LOG_INFO, ("Selected object: " + selectedGameObject->name()).c_str());
 		}
+		else {
+			selectedGameObject = nullptr;
+			LOG(LogType::LOG_INFO, "No object selected.");
+		}
 	}
 }
 
