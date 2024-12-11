@@ -52,16 +52,20 @@ bool PanelHierarchy::Draw()
    if (ImGui::BeginPopup("CreateGameObjectPopup")) 
    {
        LOG(LogType::LOG_INFO, "Popup Called");
-	   if (ImGui::MenuItem("Cut")) {}
-       if (ImGui::MenuItem("Copy")) {}
-       if (ImGui::MenuItem("Paste")) {}
-	   if (ImGui::MenuItem("Paste As Child")) {}
+	   if (ImGui::MenuItem("Cut", nullptr, nullptr, _selectedGameObject != nullptr)) {}
+       if (ImGui::MenuItem("Copy", nullptr, nullptr, _selectedGameObject != nullptr)) {}
+       if (ImGui::MenuItem("Paste", nullptr, nullptr, _selectedGameObject != nullptr)) {}
+	   if (ImGui::MenuItem("Paste As Child", nullptr, nullptr, _selectedGameObject != nullptr)) {}
 	   ImGui::Separator();
-	   if (ImGui::MenuItem("Rename")) {}
-	   if (ImGui::MenuItem("Duplicate")) {}
-	   if (ImGui::MenuItem("Delete")) {}
+	   if (ImGui::MenuItem("Rename", nullptr, nullptr, _selectedGameObject != nullptr)) {}
+	   if (ImGui::MenuItem("Duplicate", nullptr, nullptr, _selectedGameObject != nullptr)) {}
+	   if (ImGui::MenuItem("Delete", nullptr, nullptr, _selectedGameObject != nullptr)) {}
 	   ImGui::Separator();
-	   if (ImGui::MenuItem("Select Children")) {}
+	   if (ImGui::MenuItem("Select Children", nullptr, nullptr, _selectedGameObject != nullptr)) {
+		   for (auto& child : _selectedGameObject->children()) {
+			   //child->setSelected(true);
+		   }
+	   }
 	   ImGui::Separator();
        if (ImGui::MenuItem("Create Empty")) Engine::Instance().scene->CreateGameObject();
 	   if (ImGui::BeginMenu("Primitives")) {
