@@ -13,13 +13,13 @@ public:
 	PanelHierarchy(std::string name);
 	~PanelHierarchy();
 
-	bool Draw();
+	bool Draw() override;
 	void DrawGameObjectTree(GameObject* gameObject);
 	GameObject* selectedGameObject() { return _selectedGameObject; }
 	void SetSelectedGameObject(GameObject* gameObject) { _selectedGameObject = gameObject; }
 
 private:
-	GameObject* _selectedGameObject;
+	GameObject* _selectedGameObject = nullptr;
 };
 
 #endif // !__PANEL_HIERARCHY_H__

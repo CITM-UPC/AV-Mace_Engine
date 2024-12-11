@@ -9,6 +9,6 @@ public:
 	PanelConfiguration(std::string name);
 	~PanelConfiguration();
 
-	bool Draw();
+	bool Draw() override;
 };
 

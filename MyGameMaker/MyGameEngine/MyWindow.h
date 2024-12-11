@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
 
@@ -12,6 +13,10 @@ class MyWindow {
 
 	unsigned short _width = WINDOW_WIDTH;
 	unsigned short _height = WINDOW_HEIGHT;
+
+	GLuint _framebuffer = 0; // Framebuffer for rendering
+	GLuint _renderTexture = 0; // Texture attached to the framebuffer
+	GLuint _depthBuffer = 0; // Depth buffer for the framebuffer
 
 public:
 
@@ -35,7 +40,7 @@ public:
 
 	void open(const char* title, unsigned short width, unsigned short height);
 	void close();
-	bool isOpen() const { return _window; }
+	bool isOpen() const { return _window != nullptr; }
 
 	void swapBuffers() const;
 
@@ -44,5 +49,8 @@ public:
 		_width = width;
 		_height = height;
 	}
+
+	GLuint GetFramebufferTexture() const { return _renderTexture; }
+	void InitializeFramebuffer();
 
 };

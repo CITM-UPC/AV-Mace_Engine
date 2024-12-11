@@ -17,7 +17,7 @@ public:
 	PanelMenu(std::string name);
 	~PanelMenu();
 
-	bool Draw();
+	bool Draw() override;
 
 private:
 	int drawMode = 0;

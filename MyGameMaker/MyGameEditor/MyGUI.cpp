@@ -10,10 +10,9 @@
 #include "PanelInspector.h"
 #include "PanelHierarchy.h"
 #include "PanelConfiguration.h"
+#include "PanelScene.h"
 
-MyGUI::~MyGUI() {
-	
-}
+MyGUI::~MyGUI() {}
 
 void MyGUI::Awake(SDL_Window* window, void* context)
 {
@@ -31,12 +30,14 @@ void MyGUI::Awake(SDL_Window* window, void* context)
 	_inspector = new PanelInspector("Inspector");
 	_hierarchy = new PanelHierarchy("Hierarchy");
 	_configuration = new PanelConfiguration("Configuration");
+	_scene = new PanelScene("Scene");
 
 	addPanel(_console);
 	addPanel(_menu);
 	addPanel(_inspector);
 	addPanel(_hierarchy);
 	addPanel(_configuration);
+	addPanel(_scene);
 }
 
 void MyGUI::render() {

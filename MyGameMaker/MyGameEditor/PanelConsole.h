@@ -11,7 +11,7 @@ public:
 	PanelConsole(std::string name);
 	~PanelConsole();
 
-	bool Draw();
+	bool Draw() override;
 };
 
 #endif // !__PANEL_CONSOLE_H__

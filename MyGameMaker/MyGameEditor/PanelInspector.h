@@ -18,7 +18,7 @@ public:
 	std::string currentLayer() const { return _currentLayer; }
 	void setLayer(const std::string& layer) { _currentLayer = layer; }
 
-	bool Draw();
+	bool Draw() override;
 	void DrawGameObjectControls(GameObject* gameObject);
 	void DrawTransformControls(GameObject* gameObject);
 	void DrawMeshControls(GameObject* gameObject);
@@ -28,11 +28,9 @@ public:
 private:
 	// Tag options
 	std::vector<std::string> tagOptions = { "Untagged", "Player", "Camera", "Other" };
-
 	// Layer options
 	std::string _currentLayer = "Default";
 	std::vector<std::string> layers = { "Default", "TransparentFX", "Ignore Raycast", "Water", "UI", "PostProcessing" };
-
 	// Component options
 	std::vector<std::string> componentOptions = { "Transform", "Mesh", "Material", "Camera"};
 
@@ -41,7 +39,7 @@ private:
 	bool showPerFaceNormals = false;
 	bool showCheckers = false;
 	bool showWireframe = false;
-	bool uniformScale = false;
+	bool uniformScale = true;
 
 	double min_value = 1.0f;
 	double max_value = 179.0f;

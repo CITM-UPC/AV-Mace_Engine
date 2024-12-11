@@ -10,7 +10,7 @@
 #include "PanelInspector.h"
 #include "MyGameEngine/Log.h"
 
-PanelHierarchy::PanelHierarchy(std::string name) : Panel(name, WINDOW_WIDTH * 0.2, WINDOW_HEIGHT - 219)
+PanelHierarchy::PanelHierarchy(std::string name) : Panel(name, WINDOW_WIDTH * 0.15, WINDOW_HEIGHT - 219)
 {
 	SwitchState();
 }
@@ -25,10 +25,7 @@ bool PanelHierarchy::Draw()
    ImGui::Begin("Hierarchy", &showWindow, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
    if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()) SetSelectedGameObject(nullptr);
-
-   for (const std::shared_ptr<GameObject>& gameObjectPtr : Engine::Instance().scene->root()->children()) {
-	   DrawGameObjectTree(gameObjectPtr.get());
-   }
+   for (auto& gameObjectPtr : Engine::Instance().scene->root()->children()) DrawGameObjectTree(gameObjectPtr.get());
 
    // Updated drop target handling
    if (ImGui::BeginDragDropTarget()) 
@@ -40,10 +37,7 @@ bool PanelHierarchy::Draw()
 
            if (draggedObject) {
                GameObject* root = Engine::Instance().scene->root();
-               // Compare pointers directly now that parent() returns a pointer
-			   if (draggedObject->parent() != root) {
-				   draggedObject->reparent(root);
-			   }
+			   if (draggedObject->parent() != root) draggedObject->reparent(root);
            }
        }
        ImGui::EndDragDropTarget();
@@ -58,45 +52,39 @@ bool PanelHierarchy::Draw()
    if (ImGui::BeginPopup("CreateGameObjectPopup")) 
    {
        LOG(LogType::LOG_INFO, "Popup Called");
-	   if (ImGui::MenuItem("Cut")) {
-
-	   }
-       if (ImGui::MenuItem("Copy")) {
-
-	   }
-       if (ImGui::MenuItem("Paste")) {
-       }
-	   if (ImGui::MenuItem("Paste As Child")) {
-	   }
+	   if (ImGui::MenuItem("Cut")) {}
+       if (ImGui::MenuItem("Copy")) {}
+       if (ImGui::MenuItem("Paste")) {}
+	   if (ImGui::MenuItem("Paste As Child")) {}
 	   ImGui::Separator();
-	   if (ImGui::MenuItem("Rename")) {
-	   }
-	   if (ImGui::MenuItem("Duplicate")) {
-	   }
-	   if (ImGui::MenuItem("Delete")) {
-	   }
+	   if (ImGui::MenuItem("Rename")) {}
+	   if (ImGui::MenuItem("Duplicate")) {}
+	   if (ImGui::MenuItem("Delete")) {}
 	   ImGui::Separator();
-	   if (ImGui::MenuItem("Select Children")) {
-	   }
+	   if (ImGui::MenuItem("Select Children")) {}
 	   ImGui::Separator();
-       if (ImGui::MenuItem("Create Empty")) {
-           Engine::Instance().scene->CreateGameObject();
-       }
+       if (ImGui::MenuItem("Create Empty")) Engine::Instance().scene->CreateGameObject();
 	   if (ImGui::BeginMenu("Primitives")) {
+		   if (ImGui::MenuItem("Cube"))  Engine::Instance().scene->CreateCube();
+		   if (ImGui::MenuItem("Plane"))  Engine::Instance().scene->CreatePlane();
+		   if (ImGui::MenuItem("Sphere"))  Engine::Instance().scene->CreateSphere();
+		   if (ImGui::MenuItem("Cylinder"))  Engine::Instance().scene->CreateCylinder();
+		   if (ImGui::MenuItem("Cone"))  Engine::Instance().scene->CreateCone();
+		   if (ImGui::MenuItem("Torus"))  Engine::Instance().scene->CreateTorus();
+		   ImGui::EndMenu();
 	   }
-	   if (ImGui::BeginMenu("Material")) {
+	   if (ImGui::BeginMenu("Material")) 
+	   {
+		   if (ImGui::MenuItem("Create Material")) {}
+		   if (ImGui::MenuItem("Create Shader")) {}
+		   ImGui::EndMenu();
 	   }
        ImGui::EndPopup();
    }
-
    ImGui::End();
 
-   if (!showWindow) {
-       SwitchState();
-   }
-
+   if (!showWindow) SwitchState();
    Engine::Instance().scene->selectedGameObject = selectedGameObject();
-
    return true;
 }
 
@@ -117,41 +105,34 @@ void PanelHierarchy::DrawGameObjectTree(GameObject* gameObject)
 	int result = sprintf_s(uniqueLabel, labelSize, "%s##%p", gameObject->name().c_str(), static_cast<void*>(gameObject));
 	if (result < 0) strcpy_s(uniqueLabel, labelSize, gameObject->name().c_str());
 	bool isNodeOpen = ImGui::TreeNodeEx(gameObject->name().c_str(), flags);
-	if (ImGui::IsItemClicked()) {
-		SetSelectedGameObject(gameObject);
-	}
-	else {
-		SetSelectedGameObject(Engine::Instance().scene->selectedGameObject);
-	}
+
+	if (ImGui::IsItemClicked()) SetSelectedGameObject(gameObject);
+	else SetSelectedGameObject(Engine::Instance().scene->selectedGameObject);
 
 	// Begin drag source
-	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-		// Store pointer to dragged object
-		ImGui::SetDragDropPayload("GAMEOBJECT_DRAG", &gameObject, sizeof(GameObject*));
-
-		// Show preview text
-		ImGui::Text("Moving %s", gameObject->name().c_str());
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) 
+	{
+		if (gameObject) {
+			ImGui::SetDragDropPayload("GAMEOBJECT_DRAG", &gameObject, sizeof(GameObject*));
+			ImGui::Text("Moving %s", gameObject->name().c_str());
+		}
 		ImGui::EndDragDropSource();
 	}
+
 	// Handle drop target (for parenting to this object)
-	if (ImGui::BeginDragDropTarget()) {
+	if (ImGui::BeginDragDropTarget()) 
+	{
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GAMEOBJECT_DRAG")) {
 			IM_ASSERT(payload->DataSize == sizeof(GameObject*));
 			GameObject* draggedObject = *static_cast<GameObject**>(payload->Data);
-
-			if (draggedObject && draggedObject != gameObject) {
-				draggedObject->reparent(gameObject);
-			}
+			if (draggedObject && draggedObject != gameObject) draggedObject->reparent(gameObject);
 		}
 		ImGui::EndDragDropTarget();
 	}
 
 	if (isNodeOpen) {
 		auto children = gameObject->children();
-		for (const auto& child : children) 
-		{
-			if (child) DrawGameObjectTree(child.get());
-		}
+		for (const auto& child : children) if (child) DrawGameObjectTree(child.get());
 		ImGui::TreePop();
 	}
 }

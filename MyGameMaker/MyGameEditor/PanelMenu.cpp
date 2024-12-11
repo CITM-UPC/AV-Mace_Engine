@@ -12,6 +12,7 @@
 #include "PanelInspector.h"
 #include "PanelHierarchy.h"
 #include "PanelConfiguration.h"
+#include "PanelScene.h"
 
 PanelMenu::PanelMenu(std::string name) : Panel(name, 0, 0)
 {
@@ -125,8 +126,8 @@ bool PanelMenu::Draw()
 				if (ImGui::MenuItem("Inspector", nullptr, MyGUI::Instance().inspector().GetState())) {
 					MyGUI::Instance().inspector().SwitchState();
 				}
-                if (ImGui::MenuItem("Scene", nullptr, nullptr, false)) {
-                    // Action for "Undo" item
+                if (ImGui::MenuItem("Scene", nullptr, MyGUI::Instance().scene().GetState())) {
+					MyGUI::Instance().scene().SwitchState();
                 }
                 if (ImGui::MenuItem("Game", nullptr, nullptr, false)) {
                     // Action for "Undo" item
