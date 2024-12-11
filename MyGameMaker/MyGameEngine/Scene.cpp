@@ -40,8 +40,6 @@ bool isZooming = false;
 
 void Scene::Start()
 {
-	// Init camera
-	InitCamera();
 	ModelLoader loader;
 	// Specify the paths for the FBX file and the custom format file
 	std::string fbxFilePath = "Assets/street2.FBX";
@@ -53,6 +51,8 @@ void Scene::Start()
 	std::shared_ptr<GameObject> sceneobj = loader.loadFromFile(fbxFilePath);
 	root()->addChild(sceneobj);
 	root()->GetComponent<Transform>()->updateGlobalMatrix();
+	// Init camera
+	InitCamera();
 }
 
 void Scene::Update(double& dT)
@@ -309,9 +309,15 @@ std::shared_ptr<GameObject> Scene::CreateGameObject(const std::string& name)
 void Scene::InitCamera()
 {
 	_camera.AddComponent<Camera>();
-	_camera.GetComponent<Transform>()->translate(vec3(0, 3, 8));
+	BoundingBox bbox;
+	for (auto& child : root()->children().front()->children()) {
+		if (child->HasComponent<Mesh>()) {
+			bbox = child->getBoundingBox() + bbox;
+		}
+	}
+	_camera.GetComponent<Transform>()->pos() = bbox.center() + vec3(0, 50, bbox.size().z * 1.2);
 	_camera.GetComponent<Transform>()->rotate(glm::radians(180.0), vec3(0, 1, 0));
-	_camera.GetComponent<Transform>()->rotate(glm::radians(20.0), vec3(1, 0, 0));
+	_camera.GetComponent<Transform>()->rotate(glm::radians(30.0), vec3(1, 0, 0));
 
 	std::shared_ptr<GameObject> camera = std::make_shared<GameObject>(_camera);
 	root()->addChild(camera);

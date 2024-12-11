@@ -61,7 +61,7 @@ static void drawBoundingBox(const BoundingBox& bbox) {
 
 BoundingBox parentbbox;
 
-void drawDebugInfoForGraphicObject(const GameObject& obj, bool good) {
+void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
 	glMultMatrixd(obj.GetComponent<Transform>()->data());
@@ -107,3 +107,23 @@ void drawIntersectionPoint(const vec3& point) {
 	glEnable(GL_DEPTH_TEST);
 }
 */
+
+void getSceneBoundingBox(const GameObject& obj, BoundingBox& boundingBox) {
+	glPushMatrix();
+	glMultMatrixd(obj.GetComponent<Transform>()->data());
+	BoundingBox bbox;
+	BoundingBox parentbbox;
+	for (const auto& child : obj.children()) {
+		if (child->HasComponent<Mesh>()) {
+			bbox = child->getBoundingBox();
+			parentbbox = bbox + parentbbox;
+		}
+	}
+	if (obj.hasParent()) {
+		boundingBox = parentbbox;
+	}
+	for (const auto& child : obj.children()) getSceneBoundingBox(*child, boundingBox);
+
+
+	glPopMatrix();
+}
