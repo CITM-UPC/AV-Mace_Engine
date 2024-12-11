@@ -53,43 +53,6 @@ void Scene::Start()
 	std::shared_ptr<GameObject> sceneobj = loader.loadFromFile(fbxFilePath);
 	root()->addChild(sceneobj);
 	root()->GetComponent<Transform>()->updateGlobalMatrix();
-
-	//std::shared_ptr<GameObject> bakerHouse = CreateGameObject("BakerHouse");
-
-	//ModelLoader modelLoader;
-	//std::vector<std::shared_ptr<Model>> models;
-	//modelLoader.load("Assets/FBX/BakerHouse.fbx", models);
-	//BoundingBox combinedBoundingBox;
-	//for (size_t i = 0; i < models.size(); i++)
-	//{
-	//	std::shared_ptr<GameObject> go = std::make_shared<GameObject>(models[i].get()->GetMeshName());
-	//	bakerHouse->addChild(go);
-	//	
-	//	go->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
-	//	go->GetComponent<Transform>()->updateGlobalMatrix();
-	//	go->AddComponent<Mesh>();
-	//	go->GetComponent<Mesh>()->setModel(models[i]);
-	//	go->GetComponent<Mesh>()->setFilePath("Assets/FBX/BakerHouse.fbx");
-	//	go->AddComponent<Material>();
-	//	go->GetComponent<Material>()->m_Texture = std::make_unique<Texture>("Assets/Textures/Baker_house.png");
-	//	go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-	//	go->GetComponent<Mesh>()->loadToOpenGL();
-
-	//	BoundingBox meshBBox;
-
-	//	meshBBox.min = models[i]->GetModelData().vertexData.front();
-	//	meshBBox.max = models[i]->GetModelData().vertexData.front();
-
-	//	for (const auto& v : models[i]->GetModelData().vertexData) {
-	//		meshBBox.min = glm::min(meshBBox.min, glm::dvec3(v));
-	//		meshBBox.max = glm::max(meshBBox.max, glm::dvec3(v));
-	//	}
-
-	//	auto vertices = meshBBox.vertices();
-	//	for (auto& v : vertices) v = go->GetComponent<Transform>()->mat() * vec4(v, 1);
-	//	combinedBoundingBox = BoundingBox(vertices.data(), vertices.size());
-	//	combinedBoundingBox = go->GetComponent<Transform>()->mat() * combinedBoundingBox;
-	//}
 }
 
 void Scene::Update(double& dT)
@@ -308,21 +271,6 @@ void Scene::Draw(GameObject* root)
 
 void Scene::loadGameObjectByPath(const std::string& path)
 {
-	/*ModelLoader modelLoader;
-	std::vector<std::shared_ptr<Model>> models;
-	modelLoader.load(path, models);
-	for (size_t i = 0; i < models.size(); i++)
-	{
-		std::shared_ptr<GameObject> go = std::make_shared<GameObject>(models[i].get()->GetMeshName());
-		go->GetComponent<Transform>()->pos() = vec3(5, 0, 0);
-		go->AddComponent<Mesh>();
-		go->GetComponent<Mesh>()->setModel(models[i]);
-		go->GetComponent<Mesh>()->setFilePath(path);
-		go->GetComponent<Mesh>()->loadToOpenGL();
-		go->AddComponent<Material>();
-		go->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-		root()->addChild(go);
-	}*/
 	ModelLoader loader;
 	std::shared_ptr<GameObject> scene = loader.loadFromFile(path);
 	root()->addChild(scene);
@@ -361,6 +309,9 @@ void Scene::InitCamera()
 	_camera.GetComponent<Transform>()->translate(vec3(0, 3, 8));
 	_camera.GetComponent<Transform>()->rotate(glm::radians(180.0), vec3(0, 1, 0));
 	_camera.GetComponent<Transform>()->rotate(glm::radians(20.0), vec3(1, 0, 0));
+
+	std::shared_ptr<GameObject> camera = std::make_shared<GameObject>(_camera);
+	root()->addChild(camera);
 }
 
 void Scene::CreateCube()

@@ -40,9 +40,6 @@ private:
 	bool showCheckers = false;
 	bool showWireframe = false;
 	bool uniformScale = true;
-
-	double min_value = 1.0f;
-	double max_value = 179.0f;
 };
 
 #endif // !__PANEL_INSPECTOR_H__

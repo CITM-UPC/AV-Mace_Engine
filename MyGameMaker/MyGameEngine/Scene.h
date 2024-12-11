@@ -15,7 +15,7 @@ class Scene
 	std::string _name;
 	bool _active;
 	GameObject* _root = new GameObject("SceneRoot");
-	GameObject _camera = GameObject("EditorCamera", "Camera");
+	GameObject _camera = GameObject("MainCamera", "Camera");
 
 public:
 	Scene(const std::string& name, bool active = true) : _name(name), _active(active) {}

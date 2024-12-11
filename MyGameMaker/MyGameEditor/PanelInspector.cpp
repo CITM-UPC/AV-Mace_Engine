@@ -271,45 +271,32 @@ void PanelInspector::DrawCameraControls(GameObject* gameObject)
 		ImGui::Checkbox("Active", &showComponent);
 		camera->SetActive(showComponent);
 		ImGui::Text(" ");
-		ImGui::Text("Projection:");
-		ImGui::Text("Field of View");
+
+        ImGui::Text("Projection:");
+
+        // Local variables to store values
+        double fov = camera->fov();
+        double zNear = camera->near();
+        double zFar = camera->far();
+
+        double minFov = 1.0, maxFov = 120.0;
+        double minNear = 0.01, maxNear = 10.0;
+        double minFar = 1.0, maxFar = 1280.0;
+
+        ImGui::Text("Field of View");
         ImGui::Text("       ");
         ImGui::SameLine();
-        if (ImGui::SliderScalar("##fov", ImGuiDataType_Double, &camera->fov(), &min_value, &max_value, "%.2f"))
-        {
-            if (ImGui::IsItemActive()) {
-                Engine::Instance().input->ActivateTextInput();
-            }
-            else if (ImGui::IsItemDeactivatedAfterEdit()) {
-                Engine::Instance().input->ActivateTextInput(false);
-            }
-        }
+        if (ImGui::SliderScalar("##fov", ImGuiDataType_Double, &fov, &minFov, &maxFov, "%.2f")) camera->setFov(fov); 
 
-		ImGui::Text("Near Plane");
-        ImGui::Text("       ");
-		ImGui::SameLine();
-        if (ImGui::SliderScalar("##zNear", ImGuiDataType_Double, &camera->near(), &min_value, &max_value, "%.2f"))
-        {
-            if (ImGui::IsItemActive()) {
-                Engine::Instance().input->ActivateTextInput();
-            }
-            else if (ImGui::IsItemDeactivatedAfterEdit()) {
-                Engine::Instance().input->ActivateTextInput(false);
-            }
-        }
-
-		ImGui::Text("Far Plane");
+        ImGui::Text("Near Plane");
         ImGui::Text("       ");
         ImGui::SameLine();
-        if (ImGui::SliderScalar("##zFar", ImGuiDataType_Double, &camera->far(), &min_value, &max_value, "%.2f"))
-        {
-            if (ImGui::IsItemActive()) {
-                Engine::Instance().input->ActivateTextInput();
-            }
-            else if (ImGui::IsItemDeactivatedAfterEdit()) {
-                Engine::Instance().input->ActivateTextInput(false);
-            }
-        }
-		ImGui::Separator();
-	}
+        if (ImGui::SliderScalar("##zNear", ImGuiDataType_Double, &zNear, &minNear, &maxNear, "%.2f")) camera->setNear(zNear);
+
+        ImGui::Text("Far Plane");
+        ImGui::Text("       ");
+        ImGui::SameLine();
+        if (ImGui::SliderScalar("##zFar", ImGuiDataType_Double, &zFar, &minFar, &maxFar, "%.2f")) camera->setFar(zFar); 
+        ImGui::Separator();
+    }
 }

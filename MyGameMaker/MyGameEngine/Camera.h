@@ -25,6 +25,10 @@ public:
 	double& far() { return zFar; }
 	float& speed() { return _speed; };
 
+	void setFov(double fov) { if (fov >= 1.0 && fov <= 120.0) _fov = fov; }
+	void setNear(double near) { if (near > 0.0 && near < zFar) zNear = near; }
+	void setFar(double far) { if (far > zNear) zFar = far; }
+
 	glm::dmat4 projection() const;
 	glm::dmat4 view() const;
 
