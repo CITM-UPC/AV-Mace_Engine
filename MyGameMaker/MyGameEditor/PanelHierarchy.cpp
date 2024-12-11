@@ -106,7 +106,10 @@ void PanelHierarchy::DrawGameObjectTree(GameObject* gameObject)
 	if (result < 0) strcpy_s(uniqueLabel, labelSize, gameObject->name().c_str());
 	bool isNodeOpen = ImGui::TreeNodeEx(gameObject->name().c_str(), flags);
 
-	if (ImGui::IsItemClicked()) SetSelectedGameObject(gameObject);
+	if (ImGui::IsItemClicked()) {
+		SetSelectedGameObject(gameObject);
+		Engine::Instance().scene->selectedGameObject = gameObject;
+	}
 	else SetSelectedGameObject(Engine::Instance().scene->selectedGameObject);
 
 	// Begin drag source
