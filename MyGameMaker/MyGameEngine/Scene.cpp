@@ -514,19 +514,16 @@ bool Scene::IntersectRayBox(const Ray& ray, const BoundingBox& box, float& t) {
 	return true;
 }
 
-mat4 transform = 1.0f;
 
 std::shared_ptr<GameObject>& Scene::CheckIntersectionRecursive(const Ray& ray, std::shared_ptr<GameObject> object, float& closestT, std::shared_ptr<GameObject>& closestObject) {
 	// Check the bounding box of the current object
-	transform *= object->GetComponent<Transform>()->mat();
-	BoundingBox bbox = transform * object->getBoundingBox();
+	BoundingBox bbox = object->getBoundingBox();
 	float t;
 	if (object->HasComponent<Mesh>()) {
 		if (IntersectRayBox(ray, bbox, t) && t < closestT) {
 			closestT = t;
 			closestObject = object;
 		}
-		transform = 1.0f;
 	}
 
 	// Recursively check the children of the current object

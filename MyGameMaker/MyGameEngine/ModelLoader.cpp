@@ -446,46 +446,97 @@ static mat4 aiMat4ToMat4(const aiMatrix4x4& aiMat) {
 	return mat;
 }
 
-std::shared_ptr<GameObject> graphicObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<shared_ptr<Material>>& materials) {
+bool hasSubstring(const std::string& str, const std::string& substr) {
+	return str.find(substr) != std::string::npos;
+}
+
+mat4 accumulatedTransform;
+
+std::shared_ptr<GameObject> graphicObjectFromNode(
+	const aiScene& scene,
+	const aiNode& node,
+	const vector<shared_ptr<Model>>& meshes,
+	const vector<shared_ptr<Material>>& materials,
+	glm::mat4 accumulatedTransform = glm::mat4(1.0f),
+	std::shared_ptr<GameObject> root = nullptr
+) {
 	cout << node.mName.data << endl;
-	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>(node.mName.data);
 
-	obj->GetComponent<Transform>()->mat() = aiMat4ToMat4(node.mTransformation);
-	obj->GetComponent<Transform>()->updateGlobalMatrix();
+	// Check if the node has the suffix indicating it is an Assimp transformation node
+	if (hasSubstring(node.mName.data, "$AssimpFbx$")) {
 
-	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
-		const auto meshIndex = node.mMeshes[i];
-		const auto& mesh = meshes[meshIndex];
+		// Accumulate the transformation.
+		glm::mat4 nodeTransform = aiMat4ToMat4(node.mTransformation);
+		accumulatedTransform = accumulatedTransform * nodeTransform;
 
-		obj->AddComponent<Mesh>();
-		obj->GetComponent<Mesh>()->setModel(mesh);
-
-		obj->AddComponent<Material>();
-		obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]->m_TexturePath);
-		obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-		obj->GetComponent<Mesh>()->loadToOpenGL();
-
-		BoundingBox meshBBox;
-
-		meshBBox.min = meshes[meshIndex].get()->GetModelData().vertexData.front();
-		meshBBox.max = meshes[meshIndex].get()->GetModelData().vertexData.front();
-
-		for (const auto& v : meshes[meshIndex].get()->GetModelData().vertexData) {
-			meshBBox.min = glm::min(meshBBox.min, glm::dvec3(v));
-			meshBBox.max = glm::max(meshBBox.max, glm::dvec3(v));
+		// Recurse for the child nodes, passing the accumulated transformation.
+		for (unsigned int i = 0; i < node.mNumChildren; ++i) {
+			graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform, root);
 		}
 
-		obj->setBoundingBox(meshBBox);
-
+		// Return nullptr since we don't create a GameObject for transformation nodes.
+		return nullptr;
 	}
 
+	// If the current node is not a transformation node, create a GameObject
+	if (!hasSubstring(node.mName.data, "$AssimpFbx$")) {
+		std::shared_ptr<GameObject> obj = std::make_shared<GameObject>(node.mName.data);
+
+		// Apply the accumulated transformation and set the transform
+		glm::mat4 nodeTransform = aiMat4ToMat4(node.mTransformation);
+		obj->GetComponent<Transform>()->mat() = nodeTransform * accumulatedTransform;
+		obj->GetComponent<Transform>()->updateGlobalMatrix();
+
+		if (root == nullptr) {
+			root = obj;
+		}
+		else {
+			// Add this object as a child of the root
+			root->addChild(obj);
+		}
+
+		// Add mesh and material components
+		for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
+			const auto meshIndex = node.mMeshes[i];
+			const auto& mesh = meshes[meshIndex];
+
+			obj->AddComponent<Mesh>();
+			obj->GetComponent<Mesh>()->setModel(mesh);
+
+			obj->AddComponent<Material>();
+			obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]->m_TexturePath);
+			obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+			obj->GetComponent<Mesh>()->loadToOpenGL();
+
+			BoundingBox meshBBox;
+
+			meshBBox.min = meshes[meshIndex].get()->GetModelData().vertexData.front();
+			meshBBox.max = meshes[meshIndex].get()->GetModelData().vertexData.front();
+
+			for (const auto& v : meshes[meshIndex].get()->GetModelData().vertexData) {
+				meshBBox.min = glm::min(meshBBox.min, glm::dvec3(v));
+				meshBBox.max = glm::max(meshBBox.max, glm::dvec3(v));
+			}
+
+			obj->setBoundingBox(meshBBox);
+		}
+
+		// Process and add children as children of the current node
+		for (unsigned int i = 0; i < node.mNumChildren; ++i) {
+			auto child = graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform, root);
+		}
+
+		return obj;
+	}
+
+	// For nodes with the $AssimpFbx$ suffix, process children but do not create GameObjects
 	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-		auto child = graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials);
-		obj->addChild(child);
+		graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform);
 	}
 
-	return obj;
+	return nullptr; // Return nullptr for transformation nodes as they do not create GameObjects
 }
+
 
 std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filename)
 {

@@ -66,31 +66,22 @@ void drawDebugInfoForGraphicObject(const GameObject& obj, bool good) {
 	glColor3ub(255, 255, 0);
 	glMultMatrixd(obj.GetComponent<Transform>()->data());
 	drawAxis(0.5);
+	glColor3ub(0, 255, 255);
 	BoundingBox bbox;
-	bbox = obj.getBoundingBox();
-	if (obj.HasComponent<Mesh>() && good) {
-		glColor3ub(0, 255, 255);
-		drawBoundingBox(bbox);
-	}
-	else {
-		//Run means it's the first transformation, meaning all transformations are applied and the drawing is in place.
-		bool run = good;
-		if (obj.parent() == Engine::Instance().scene->root()) {
-			run = true;
-		}
-		for (const auto& child : obj.children()) {
-			if (!child->HasComponent<Mesh>()) {
-				parentbbox = bbox + parentbbox;
-			}
-			drawDebugInfoForGraphicObject(*child, run);
+	BoundingBox parentbbox;
+	for (const auto& child : obj.children()) {
+		if (child->HasComponent<Mesh>()) {
+			bbox = child->getBoundingBox();
+			parentbbox = bbox + parentbbox;
+			drawBoundingBox(bbox);
 		}
 	}
-
-	if (!obj.hasParent()) {
-		glColor3ub(255, 255, 0);
+	glColor3ub(255, 255, 0);
+	if (obj.hasParent()) {
 		drawBoundingBox(parentbbox);
-		parentbbox = BoundingBox();
 	}
+	for (const auto& child : obj.children()) drawDebugInfoForGraphicObject(*child);
+
 
 	glPopMatrix();
 }
