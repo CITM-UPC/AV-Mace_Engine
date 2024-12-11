@@ -215,10 +215,13 @@ void Scene::Update(double& dT)
 		Engine::Instance().input->GetMousePosition(mouseX, mouseY);
 
 		// Screen dimensions
-		int screenWidth = Engine::Instance().window->width();
-		int screenHeight = Engine::Instance().window->height();
+		int screenWidth = Engine::Instance().window->renderWidth();
+		int screenHeight = Engine::Instance().window->renderHeight();
 
-		Ray ray = CalculatePickingRay(mouseX, mouseY, camera()->GetComponent<Camera>(), screenWidth, screenHeight);
+		if (mouseX < Engine::Instance().window->renderX() || mouseX >(Engine::Instance().window->renderX() + screenWidth) || mouseY < 20 || mouseY > screenHeight) {
+			return;
+		}
+		Ray ray = CalculatePickingRay(mouseX, mouseY - Engine::Instance().window->renderY(), camera()->GetComponent<Camera>(), screenWidth, screenHeight);
 
 		float closestT = FLT_MAX;
 		std::shared_ptr<GameObject> closestObject = nullptr;
@@ -424,7 +427,7 @@ void Scene::CreateTorus()
 }
 
 Ray Scene::CalculatePickingRay(int mouseX, int mouseY, Camera* camera, int screenWidth, int screenHeight) {
-	glm::vec4 viewport(0, 0, screenWidth, screenHeight);
+	glm::vec4 viewport(WINDOW_WIDTH * 0.15, 200, screenWidth, screenHeight);
 
 	glm::mat4 view = glm::mat4(camera->view());
 	glm::mat4 projection = glm::mat4(camera->projection()); 

@@ -39,6 +39,7 @@ void Engine::Start()
     input->Start();
 	renderer->Start();
 	scene->Start();
+    window->setRenderSize(window->renderX(), window->renderY(), window->renderWidth(), window->renderHeight());
 }
 
 bool Engine::PreUpdate()
@@ -50,6 +51,8 @@ bool Engine::PreUpdate()
 void Engine::Update(double& dt)
 {
     this->dt = dt;
+    window->setRenderWidth(window->width() - ((WINDOW_WIDTH * 0.25) + (WINDOW_WIDTH * 0.15)));
+    window->setRenderHeight(window->height() - 200);
 	scene->Update(dt);
 }
 
@@ -65,9 +68,8 @@ void Engine::PostUpdate()
     //draw things
     drawFloorGrid(16, 0.25);
     scene->Draw(scene->root());
-
-    glViewport(0, 0, window->width(), window->height());
-    scene->camera()->GetComponent<Camera>()->aspect() = static_cast<double>(window->width()) / window->height();
+    glViewport(window->renderX(), window->renderY(), window->renderWidth(), window->renderHeight());
+    scene->camera()->GetComponent<Camera>()->aspect() = static_cast<double>(window->renderWidth()) / window->renderHeight();
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixd(&scene->camera()->GetComponent<Camera>()->projection()[0][0]);
 }

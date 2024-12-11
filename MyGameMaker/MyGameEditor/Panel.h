@@ -26,6 +26,9 @@ public:
 		showWindow = enabled;
 	}
 
+	int getWidth() { return width; }
+	int getHeight() { return height; }
+
 protected:
 
 	std::string name;

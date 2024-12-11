@@ -18,6 +18,11 @@ class MyWindow {
 	GLuint _renderTexture = 0; // Texture attached to the framebuffer
 	GLuint _depthBuffer = 0; // Depth buffer for the framebuffer
 
+	unsigned short _renderWidth = 800;  
+	unsigned short _renderHeight = 600; 
+	unsigned short _renderX = WINDOW_WIDTH * 0.15;
+	unsigned short _renderY = 200;
+
 public:
 
 	int width() const { return _width; }
@@ -52,5 +57,13 @@ public:
 
 	GLuint GetFramebufferTexture() const { return _renderTexture; }
 	void InitializeFramebuffer();
+
+	int renderWidth() const { return _renderWidth; }
+	int renderHeight() const { return _renderHeight; }
+	void setRenderSize(int x, int y, int width, int height);
+	void setRenderWidth(int width) { _renderWidth = width; }
+	void setRenderHeight(int height) { _renderHeight = height; }
+	int renderX() const { return _renderX; }
+	int renderY() const { return _renderY; }
 
 };
