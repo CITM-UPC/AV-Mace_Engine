@@ -255,7 +255,7 @@ void PanelInspector::DrawMaterialControls(GameObject* gameObject)
             ImGui::TextColored(magenta, material->m_Shader->GetFilePath().c_str());
         }
        
-        ImGui::Checkbox("Albedo", &showCheckers);
+        ImGui::Checkbox("Albedo", &showAlbedo);
         ImGui::Checkbox("Show Checkers", &showCheckers);
         ImGui::Separator();
     }

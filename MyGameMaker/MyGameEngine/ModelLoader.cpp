@@ -502,7 +502,6 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 			obj->AddComponent<Mesh>();
 			obj->GetComponent<Mesh>()->setModel(mesh);
-
 			obj->AddComponent<Material>();
 			obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]->m_TexturePath);
 			obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
@@ -536,7 +535,6 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 	return nullptr; // Return nullptr for transformation nodes as they do not create GameObjects
 }
-
 
 std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filename)
 {

@@ -37,6 +37,7 @@ private:
 	bool showComponent = false;
 	bool showPerTriangleNormals = false;
 	bool showPerFaceNormals = false;
+	bool showAlbedo = false;
 	bool showCheckers = false;
 	bool showWireframe = false;
 	bool uniformScale = true;
