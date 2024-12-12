@@ -83,18 +83,18 @@ bool PanelMenu::Draw()
             if (ImGui::MenuItem("Duplicate", "Ctrl+D", nullptr, false)) {
                 // Action for "Undo" item
             }
-            if (ImGui::MenuItem("Delete", "Supr", nullptr, false)) {
-                // Action for "Undo" item
+            if (ImGui::MenuItem("Delete", "Supr", nullptr, MyGUI::Instance().hierarchy().GetState())) {
+				MyGUI::Instance().hierarchy().selectedGameObject()->Delete();
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Play", "Ctrl+P", nullptr, false)) {
-                // Action for "Undo" item
+            if (ImGui::MenuItem("Play", "Ctrl+P", nullptr)) {
+                LOG(LogType::LOG_INFO, "Play button pressed");
             }
-            if (ImGui::MenuItem("Pause", "Ctrl+Shift+P", nullptr, false)) {
-                // Action for "Undo" item
+            if (ImGui::MenuItem("Pause", "Ctrl+Shift+P", nullptr)) {
+                LOG(LogType::LOG_INFO, "Pause button pressed");
             }
-            if (ImGui::MenuItem("Step", "Ctrl+Alt+P", nullptr, false)) {
-                // Action for "Undo" item
+            if (ImGui::MenuItem("Step", "Ctrl+Alt+P", nullptr)) {
+                LOG(LogType::LOG_INFO, "Step button pressed");
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Settings...")) {
