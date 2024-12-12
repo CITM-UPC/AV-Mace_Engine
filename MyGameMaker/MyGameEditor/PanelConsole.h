@@ -1,5 +1,3 @@
-#ifndef __PANEL_CONSOLE_H__
-#define __PANEL_CONSOLE_H__
 #pragma once
 
 #include "Panel.h"
@@ -13,5 +11,3 @@ public:
 
 	bool Draw() override;
 };
-
-#endif // !__PANEL_CONSOLE_H__

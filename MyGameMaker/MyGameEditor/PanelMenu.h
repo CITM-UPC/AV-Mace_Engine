@@ -1,5 +1,3 @@
-#ifndef __PANEL_MENU_H__
-#define __PANEL_MENU_H__
 #pragma once
 
 #include "Panel.h"
@@ -29,6 +27,3 @@ private:
 	bool showPerTriangleNormals = false;
 	bool showPerFaceNormals = false;
 };
-
-
-#endif // !__PANEL_MENU_H__

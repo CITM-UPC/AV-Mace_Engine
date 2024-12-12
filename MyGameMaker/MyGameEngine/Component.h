@@ -1,28 +1,25 @@
 #pragma once
-
 #include "GameObject.h"
-#include <string>
 
-class GameObject;
-
-class Component
+class Component : public GameObject::IComponent
 {
 	bool _active;
 	GameObject* _owner;
 
 public:
-	Component() : _active(true), _owner(nullptr) {}
-	Component(bool active, GameObject* owner) : _active(active), _owner(owner)  {}
-	virtual ~Component() {
-		_owner = nullptr; // Remove association with the owner.
-		_active = false;  // Mark as inactive to indicate cleanup.
-	}
+	explicit Component(GameObject* owner) : _active(true), _owner(owner)  {}
+	Component(const Component& other) = delete;
+	Component(Component&& other) noexcept {}
+	virtual ~Component() = default;
 
-	GameObject* getOwner() const { return _owner; }
+	const GameObject* owner() const override { return _owner; }
+	GameObject* owner() override { return _owner; }
+	void SetOwner(GameObject* owner) override { this->_owner = owner; }
+
 	auto& isActive() { return _active; }
 	bool SetActive(bool active) { return this->_active = active; }
 	void SwitchState() { _active = !_active; }
 
-	virtual bool operator==(const Component& other) const {	return _active == other._active && _owner == other._owner; }
-	virtual bool operator!=(const Component& other) const {	return !(*this == other); }
+	virtual bool operator==(const Component& other) const { return _active == other._active && _owner == other._owner; }
+	virtual bool operator!=(const Component& other) const { return !(*this == other); }
 };

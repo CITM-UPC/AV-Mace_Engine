@@ -1,5 +1,3 @@
-#ifndef __PANEL_INSPECTOR_H__
-#define __PANEL_INSPECTOR_H__
 #pragma once
 
 #include <vector>
@@ -41,6 +39,7 @@ private:
 	bool showCheckers = false;
 	bool showWireframe = false;
 	bool uniformScale = true;
-};
 
-#endif // !__PANEL_INSPECTOR_H__
+	double min_value = 1.0f;
+	double max_value = 179.0f;
+};

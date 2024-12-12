@@ -9,22 +9,16 @@
 #include <fstream>
 #include <functional>
 
-
 #include "Texture.h"
 #include "Material.h"
 #include "Transform.h"
 #include "Mesh.h"
 #include "Scene.h"
 #include "Engine.h"
-#include "BoundingBox.h"
-
 #include "Log.h"
 
 void ModelLoader::load(const std::string& filename, std::vector<std::shared_ptr<Model>>& models) const
 {
-	// And have it read the given file with some example postprocessing
-	// Usually - if speed is not the most important aspect for you - you'll
-	// probably to request more postprocessing than we do in this example.
 	const aiScene* scene = aiImportFile(filename.c_str(),
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
@@ -51,32 +45,29 @@ void ModelLoader::load(const std::string& filename, std::vector<std::shared_ptr<
 			models[i]->SetMeshName(mesh->mName.C_Str());
 
 			for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
-
-				// Coordenadas de los vértices
 				aiVector3D vertex = mesh->mVertices[j];
 				vec3 aux = vec3(vertex.x, vertex.y, vertex.z);
 				modelsData[i]->vertexData.push_back(aux);
 
 				// Coordenadas UV (si existen)
-				if (mesh->mTextureCoords[0]) {  // Comprueba si hay UVs
+				if (mesh->mTextureCoords[0]) { 
 					aiVector3D uv = mesh->mTextureCoords[0][j];
-					aux.x = uv.x;  // Solo X y Y
+					aux.x = uv.x;
 					aux.y = uv.y;
 				}
 				modelsData[i]->vertex_texCoords.push_back(aux);
 
-				if (mesh->HasNormals()) {  // Verifica si hay normales
+				if (mesh->HasNormals()) {
 					aiVector3D normal = mesh->mNormals[j];
 					vec3 auxNormal(normal.x, normal.y, normal.z);
 					modelsData[i]->vertex_normals.push_back(auxNormal);
 				}
 
-				if (mesh->HasVertexColors(0)) {  // Verifica si hay colores
+				if (mesh->HasVertexColors(0)) {
 					aiColor4D color = mesh->mColors[0][j];
 					vec3 auxColor(color.r, color.g, color.b);
 					modelsData[i]->vertex_colors.push_back(auxColor);
 				}
-
 			}
 
 			for (unsigned int j = 0; j < mesh->mNumFaces; j++) {
@@ -87,15 +78,12 @@ void ModelLoader::load(const std::string& filename, std::vector<std::shared_ptr<
 			}
 
 			models[i]->SetModelData(*modelsData[i]);
-
 		}
-
 	}
 }
 
 void ModelLoader::load(Shapes shape, std::shared_ptr<Model>& model)
 {
-
 	std::shared_ptr<ModelData> modelData = std::make_shared<ModelData>();
 	model = std::make_shared<Model>();
 
@@ -412,19 +400,18 @@ static void createMeshesFromFBX(const aiScene& scene, std::vector<std::shared_pt
 	}
 }
 
-static void createMaterialsFromFBX(const aiScene& scene, const std::filesystem::path& basePath, std::vector<std::shared_ptr<Material>>& materials) {
+static void createMaterialsFromFBX(const aiScene& scene, const std::filesystem::path& basePath, std::vector<std::string>& materials) {
 
 	materials.resize(scene.mNumMaterials);
 
 	for (unsigned int i = 0; i < scene.mNumMaterials; ++i) {
 		const auto* fbx_material = scene.mMaterials[i];
-		materials[i] = std::make_shared<Material>();
 
 		if (fbx_material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
 			aiString texturePath;
 			fbx_material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 			const string textureFileName = std::filesystem::path(texturePath.C_Str()).filename().string();
-			materials[i]->m_TexturePath = (basePath / textureFileName).string();
+			materials[i] = (basePath / textureFileName).string();
 
 			auto uWrapMode = aiTextureMapMode_Wrap;
 			auto vWrapMode = aiTextureMapMode_Wrap;
@@ -452,14 +439,8 @@ bool hasSubstring(const std::string& str, const std::string& substr) {
 
 mat4 accumulatedTransform;
 
-std::shared_ptr<GameObject> graphicObjectFromNode(
-	const aiScene& scene,
-	const aiNode& node,
-	const vector<shared_ptr<Model>>& meshes,
-	const vector<shared_ptr<Material>>& materials,
-	glm::mat4 accumulatedTransform = glm::mat4(1.0f),
-	std::shared_ptr<GameObject> root = nullptr
-) {
+GameObject* gameObjectFromNode(const aiScene& scene, const aiNode& node, const vector<shared_ptr<Model>>& meshes, const vector<string>& materials, glm::mat4 accumulatedTransform = glm::mat4(1.0f), GameObject* root = nullptr)
+{
 	cout << node.mName.data << endl;
 
 	// Check if the node has the suffix indicating it is an Assimp transformation node
@@ -471,7 +452,7 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 		// Recurse for the child nodes, passing the accumulated transformation.
 		for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-			graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform, root);
+			gameObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform, root);
 		}
 
 		// Return nullptr since we don't create a GameObject for transformation nodes.
@@ -480,19 +461,19 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 	// If the current node is not a transformation node, create a GameObject
 	if (!hasSubstring(node.mName.data, "$AssimpFbx$")) {
-		std::shared_ptr<GameObject> obj = std::make_shared<GameObject>(node.mName.data);
+		GameObject* obj = &GameObject(node.mName.data);
 
 		// Apply the accumulated transformation and set the transform
 		glm::mat4 nodeTransform = aiMat4ToMat4(node.mTransformation);
-		obj->GetComponent<Transform>()->mat() = nodeTransform * accumulatedTransform;
-		obj->GetComponent<Transform>()->updateGlobalMatrix();
+		obj->GetComponent<Transform>().mat() = nodeTransform * accumulatedTransform;
+		obj->GetComponent<Transform>().updateGlobalMatrix();
 
 		if (root == nullptr) {
 			root = obj;
 		}
 		else {
 			// Add this object as a child of the root
-			root->addChild(obj);
+			root->emplaceChild(*obj);
 		}
 
 		// Add mesh and material components
@@ -501,12 +482,12 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 			const auto& mesh = meshes[meshIndex];
 
 			obj->AddComponent<Mesh>();
-			obj->GetComponent<Mesh>()->setModel(mesh);
-			obj->GetComponent<Mesh>()->setFilePath(mesh->GetMeshName());
+			obj->GetComponent<Mesh>().setModel(mesh);
+			obj->GetComponent<Mesh>().setFilePath(mesh->GetMeshName());
 			obj->AddComponent<Material>();
-			obj->GetComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]->m_TexturePath);
-			obj->GetComponent<Material>()->m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
-			obj->GetComponent<Mesh>()->loadToOpenGL();
+			obj->GetComponent<Material>().m_Texture = std::make_unique<Texture>(materials[mesh->GetMaterialIndex()]);
+			obj->GetComponent<Material>().m_Shader = std::make_unique<Shader>("Assets/Shaders/Basic.shader");
+			obj->GetComponent<Mesh>().loadToOpenGL();
 
 			BoundingBox meshBBox;
 
@@ -523,7 +504,7 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 		// Process and add children as children of the current node
 		for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-			auto child = graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform, root);
+			obj->emplaceChild(gameObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform, root));
 		}
 
 		return obj;
@@ -531,13 +512,13 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 	// For nodes with the $AssimpFbx$ suffix, process children but do not create GameObjects
 	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-		graphicObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform);
+		gameObjectFromNode(scene, *node.mChildren[i], meshes, materials, accumulatedTransform);
 	}
 
 	return nullptr; // Return nullptr for transformation nodes as they do not create GameObjects
 }
 
-std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filename)
+GameObject* ModelLoader::loadFromFile(const std::string& filename)
 {
 	// Derive the custom format file path
 	std::filesystem::path filePath = filename;
@@ -546,7 +527,7 @@ std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filenam
 	if (std::filesystem::exists(customFilePath)) {
 		// Load from the custom format
 		std::cout << "Loading from custom format: " << customFilePath << std::endl;
-		return loadFromCustomFormat(customFilePath.string());
+		return ModelLoader::loadFromCustomFormat(customFilePath.string());
 	}
 	else {
 		// Load the FBX file
@@ -567,15 +548,13 @@ std::shared_ptr<GameObject> ModelLoader::loadFromFile(const std::string& filenam
 		// Create models and materials from FBX
 		std::vector<std::shared_ptr<Model>> models;
 		createMeshesFromFBX(*scene, models);
-		std::vector<std::shared_ptr<Material>> materials;
+		std::vector<std::string> materials;
 		createMaterialsFromFBX(*scene, std::filesystem::absolute(filename).parent_path(), materials);
 
 		// Create the GameObject hierarchy
-		std::shared_ptr<GameObject> fbx_obj = graphicObjectFromNode(*scene, *scene->mRootNode, models, materials);
+		GameObject* fbx_obj = gameObjectFromNode(*scene, *scene->mRootNode, models, materials);
 		aiReleaseImport(scene);
 
-		// Assign name and return
-		//fbx_obj->name() = std::filesystem::path(filename).stem().string();
 		return fbx_obj;
 	}
 }
@@ -685,10 +664,11 @@ void ModelLoader::saveFBXToCustomFormat(const std::string& fbxFilePath, const st
 	std::cout << "FBX data saved to " << outputFilePath << std::endl;
 }
 
-
-std::shared_ptr<GameObject> ModelLoader::loadFromCustomFormat(const std::string& filePath) {
+GameObject* ModelLoader::loadFromCustomFormat(const std::string& filePath) 
+{
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file) {
+		LOG(LogType::LOG_WARNING, "Error: Unable to open custom format file for reading: %s", filePath.c_str());
 		std::cerr << "Error: Unable to open custom format file for reading: " << filePath << std::endl;
 		return nullptr;
 	}
@@ -697,6 +677,12 @@ std::shared_ptr<GameObject> ModelLoader::loadFromCustomFormat(const std::string&
 	size_t modelCount = 0, materialCount = 0;
 	file.read(reinterpret_cast<char*>(&modelCount), sizeof(size_t));
 	file.read(reinterpret_cast<char*>(&materialCount), sizeof(size_t));
+
+	if (file.fail()) {
+		LOG(LogType::LOG_WARNING, "Error reading model and material counts");
+		std::cerr << "Error reading model and material counts" << std::endl;
+		return nullptr;
+	}
 
 	std::cout << "Model count: " << modelCount << std::endl;
 	std::cout << "Material count: " << materialCount << std::endl;
@@ -716,13 +702,14 @@ std::shared_ptr<GameObject> ModelLoader::loadFromCustomFormat(const std::string&
 		file.read(reinterpret_cast<char*>(&normalCount), sizeof(size_t));
 		file.read(reinterpret_cast<char*>(&colorCount), sizeof(size_t));
 
-		std::cout << "Model " << i << " - Vertex count: " << vertexCount << std::endl;
-		std::cout << "Model " << i << " - Index count: " << indexCount << std::endl;
-
 		if (file.fail()) {
-			std::cerr << "Error reading data for model " << i << std::endl;
+			LOG(LogType::LOG_WARNING, "Error reading data counts for model %d", i);
+			std::cerr << "Error reading data counts for model " << i << std::endl;
 			return nullptr;
 		}
+
+		std::cout << "Model " << i << " - Vertex count: " << vertexCount << std::endl;
+		std::cout << "Model " << i << " - Index count: " << indexCount << std::endl;
 
 		std::cout << "File position after reading size data for model " << i << ": " << file.tellg() << std::endl;
 
@@ -751,6 +738,7 @@ std::shared_ptr<GameObject> ModelLoader::loadFromCustomFormat(const std::string&
 
 		if (i < modelCount - 1) {
 			file.seekg(modelDataSize, std::ios::cur);
+			LOG(LogType::LOG_WARNING, "File position after reading model %d: %d", i, file.tellg());
 			std::cout << "File position after seeking for next model: " << file.tellg() << std::endl;
 		}
 
@@ -771,21 +759,27 @@ std::shared_ptr<GameObject> ModelLoader::loadFromCustomFormat(const std::string&
 			file.read(&texturePath[0], texturePathLength);
 			material->m_TexturePath = texturePath;
 		}
+
+		if (file.fail()) {
+			LOG(LogType::LOG_WARNING, "Error reading material data");
+			std::cerr << "Error reading material data" << std::endl;
+			return nullptr;
+		}
 	}
 
 	// Load GameObject hierarchy
-	std::function<std::shared_ptr<GameObject>()> loadGameObject = [&file, &loadGameObject, &models, &materials]() {
+	std::function<GameObject* ()> loadGameObject = [&file, &loadGameObject, &models, &materials]() -> GameObject* {
 		size_t nameLength = 0;
 		file.read(reinterpret_cast<char*>(&nameLength), sizeof(size_t));
 		std::string objectName(nameLength, '\0');
 		file.read(&objectName[0], nameLength);
 
-		auto gameObject = std::make_shared<GameObject>(objectName);
+		auto gameObject = new GameObject(objectName);
 
 		// Load transform
 		mat4 transformMatrix;
 		file.read(reinterpret_cast<char*>(&transformMatrix), sizeof(mat4));
-		gameObject->GetComponent<Transform>()->mat() = transformMatrix;
+		gameObject->GetComponent<Transform>().mat() = transformMatrix;
 
 		// Load attached mesh (if any)
 		bool hasMesh = false;
@@ -793,23 +787,21 @@ std::shared_ptr<GameObject> ModelLoader::loadFromCustomFormat(const std::string&
 		if (hasMesh) {
 			size_t modelIndex = 0;
 			file.read(reinterpret_cast<char*>(&modelIndex), sizeof(size_t));
-			gameObject->AddComponent<Mesh>()->setModel(models[modelIndex]);
+			gameObject->AddComponent<Mesh>().setModel(models[modelIndex]);
 
 			// Attach material
 			size_t materialIndex = 0;
 			file.read(reinterpret_cast<char*>(&materialIndex), sizeof(size_t));
-			gameObject->AddComponent<Material>()->m_Texture = std::make_unique<Texture>(materials[materialIndex]->m_TexturePath);
+			gameObject->AddComponent<Material>().m_Texture = std::make_unique<Texture>(materials[materialIndex]->m_TexturePath);
 		}
 
 		// Load children
 		size_t childCount = 0;
 		file.read(reinterpret_cast<char*>(&childCount), sizeof(size_t));
-		for (size_t i = 0; i < childCount; ++i) {
-			gameObject->addChild(loadGameObject());
-		}
+		for (size_t i = 0; i < childCount; ++i) gameObject->emplaceChild(loadGameObject());
 
 		return gameObject;
-		};
+	};
 
 	auto rootObject = loadGameObject();
 

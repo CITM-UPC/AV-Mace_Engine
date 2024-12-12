@@ -12,25 +12,40 @@
 
 void Engine::Awake()
 {
-    LOG(LogType::LOG_INFO, "Welcome to AV_Mace Engine!");
-    window = new MyWindow();
-    input = new Input();
-	renderer = new Renderer();
-	scene = new Scene("Scene");
+    try
+    {
+        LOG(LogType::LOG_INFO, "Welcome to AV_Mace Engine!");
+        window = new MyWindow();
+        input = new Input();
+        renderer = new Renderer();
+        scene = new Scene("Scene");
 
-    LOG(LogType::LOG_CHANGE_ENV, "------------- Application Init -------------");
-    window->Awake();
-    input->Awake();
+        LOG(LogType::LOG_CHANGE_ENV, "------------- Application Init -------------");
+        window->Awake();
+        input->Awake();
 
-    LOG(LogType::LOG_INFO, "# Initializing DevIL...");
-    ilInit();
-    iluInit();
+        LOG(LogType::LOG_INFO, "# Initializing DevIL...");
+        ilInit();
+        iluInit();
 
-    int devilVersion = ilGetInteger(IL_VERSION_NUM);
-    int iluVersion = ilGetInteger(ILU_VERSION_NUM);
+        int devilVersion = ilGetInteger(IL_VERSION_NUM);
+        int iluVersion = ilGetInteger(ILU_VERSION_NUM);
 
-    LOG(LogType::LOG_APPINFO, "DevIL version: %s", std::to_string(devilVersion).c_str());
-    LOG(LogType::LOG_APPINFO, "ILU version: %s", std::to_string(iluVersion).c_str());
+        LOG(LogType::LOG_APPINFO, "DevIL version: %s", std::to_string(devilVersion).c_str());
+        LOG(LogType::LOG_APPINFO, "ILU version: %s", std::to_string(iluVersion).c_str());
+    }
+    catch (const std::exception& e)
+    {
+        LOG(LogType::LOG_WARNING, e.what());
+        CleanUp();
+        throw; // Re-throw the exception after cleanup
+    }
+    catch (...)
+    {
+        LOG(LogType::LOG_WARNING, "Unknown error occurred during Engine::Awake");
+        CleanUp();
+        throw; // Re-throw the exception after cleanup
+    }
 }
 
 void Engine::Start()
@@ -60,18 +75,17 @@ void Engine::PostUpdate()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //draw floor grid
+    // Draw floor grid
     glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixd(&scene->camera()->GetComponent<Camera>()->view()[0][0]);
+    glLoadMatrixd(glm::value_ptr(scene->camera()->GetComponent<Camera>().view()));
 
-
-    //draw things
-    drawFloorGrid(16, 0.25);
+    // Draw things
+    drawFloorGrid(16, 0.25f);
     scene->Draw(scene->root());
     glViewport(window->renderX(), window->renderY(), window->renderWidth(), window->renderHeight());
-    scene->camera()->GetComponent<Camera>()->aspect() = static_cast<double>(window->renderWidth()) / window->renderHeight();
+    scene->camera()->GetComponent<Camera>().aspect() = static_cast<double>(window->renderWidth()) / window->renderHeight();
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixd(&scene->camera()->GetComponent<Camera>()->projection()[0][0]);
+    glLoadMatrixd(glm::value_ptr(scene->camera()->GetComponent<Camera>().projection()));
 }
 
 void Engine::CleanUp()
@@ -103,10 +117,7 @@ void Engine::CleanLogs()
     logs.clear();
 }
 
-Engine::~Engine()
-{
-
-}
+Engine::~Engine() {}
 
 void Engine::SwapBuffers()
 {

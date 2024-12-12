@@ -64,7 +64,7 @@ BoundingBox parentbbox;
 void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
-	glMultMatrixd(obj.GetComponent<Transform>()->data());
+	glMultMatrixd(obj.GetComponent<Transform>().data());
 	drawAxis(0.5);
 	glColor3ub(0, 255, 255);
 	BoundingBox bbox;
@@ -86,31 +86,9 @@ void drawDebugInfoForGraphicObject(const GameObject& obj) {
 	glPopMatrix();
 }
 
-/*
-void drawSegment(const Segment& s) {
-	glLineWidth(4.0);
-	glBegin(GL_LINES);
-	glColor3ub(0, 0, 0);
-	glVertex3(s.start);
-	glColor3ub(255, 255, 255);
-	glVertex3(s.end);
-	glEnd();
-}
-
-void drawIntersectionPoint(const vec3& point) {
-	glDisable(GL_DEPTH_TEST);
-	glPointSize(8);
-	glBegin(GL_POINTS);
-	glColor3ub(255, 0, 0);
-	glVertex3(point);
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-}
-*/
-
 void getSceneBoundingBox(const GameObject& obj, BoundingBox& boundingBox) {
 	glPushMatrix();
-	glMultMatrixd(obj.GetComponent<Transform>()->data());
+	glMultMatrixd(obj.GetComponent<Transform>().data());
 	BoundingBox bbox;
 	BoundingBox parentbbox;
 	for (const auto& child : obj.children()) {

@@ -5,40 +5,39 @@
 
 #include "glm/glm.hpp"
 
-using namespace std;
-
 struct ShaderProgramSource {
-	string VertexSource;
-	string FragmentSource;
+	std::string VertexSource;
+	std::string FragmentSource;
 };
 
-
-class Shader {
+class Shader 
+{
 private:
-	string m_FilePath;
+	std::string m_FilePath;
 	unsigned int m_RendererID;
-	unordered_map<string, int> m_UniformLocationCache;
+	unordered_map<std::string, int> m_UniformLocationCache;
 
 public:
-	Shader(const string& filepath);
+	Shader() = default;
+	Shader(const std::string& filepath);
 	~Shader();
 
 	void Bind() const;
 	void UnBind() const;
 
-	string GetFilePath() const { return m_FilePath; }
+	std::string GetFilePath() const { return m_FilePath; }
 
 	//Set uniforms
-	void SetUniform4f(const string& name, float v0, float v1, float v2, float v3);
-	void SetUniform1i(const string& name, int value);
-	void SetUniformMat4f(const string& name, const glm::mat4& matrix);
-	void SetUniform1iv(const string& name, int size, int value[]);
-	void SetUniformBool(const string& name, bool value);
+	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+	void SetUniform1i(const std::string& name, int value);
+	void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
+	void SetUniform1iv(const std::string& name, int size, int value[]);
+	void SetUniformBool(const std::string& name, bool value);
 
 private:
 	ShaderProgramSource ParseShader(const std::string& filepath);
 	unsigned int CompileShader(unsigned int type, const std::string& source);
 	unsigned int CreateShader(const std::string& VertexShader, const std::string& FragmentShader);
 
-	int GetUniformLocation(const string& name);
+	int GetUniformLocation(const std::string& name);
 };

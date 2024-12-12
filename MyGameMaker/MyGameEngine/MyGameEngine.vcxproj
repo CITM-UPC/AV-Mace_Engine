@@ -150,7 +150,6 @@
     <ClInclude Include="PerfTimer.h" />
     <ClInclude Include="PolymorphList.h" />
     <ClInclude Include="Ray.h" />
-    <ClInclude Include="readOnlyView.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />

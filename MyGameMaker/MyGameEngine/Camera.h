@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Transform.h"
 
 class Camera : public Component 
@@ -11,7 +10,7 @@ class Camera : public Component
 	float _speed = 10.0f;
 
 public:
-	Camera(bool active, GameObject* owner) : Component(active, owner) {}
+	Camera(bool active, GameObject* owner) : Component(owner) {}
 	~Camera() {}
 
 	const double fov() const { return _fov; };

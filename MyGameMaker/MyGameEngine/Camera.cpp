@@ -8,7 +8,7 @@ glm::dmat4 Camera::projection() const {
 }
 
 glm::dmat4 Camera::view() const {
-	return glm::lookAt(this->getOwner()->GetComponent<Transform>()->pos(), this->getOwner()->GetComponent<Transform>()->pos() + this->getOwner()->GetComponent<Transform>()->fwd(), this->getOwner()->GetComponent<Transform>()->up());
+	return glm::lookAt(this->owner()->GetComponent<Transform>().pos(), this->owner()->GetComponent<Transform>().pos() + this->owner()->GetComponent<Transform>().fwd(), this->owner()->GetComponent<Transform>().up());
 }
 
 std::list<Plane> Camera::frustumPlanes() const
@@ -17,11 +17,11 @@ std::list<Plane> Camera::frustumPlanes() const
     const auto v_fov = 2.0 * glm::atan(glm::tan(glm::radians(h_fov) / 2.0) / _aspect);  // Calcular FOV vertical basado en el horizontal y el aspect ratio
 
     // Posición y orientación de la cámara
-    const auto& transform = this->getOwner()->GetComponent<Transform>();
-    const auto& pos = transform->pos();
-    const auto& fwd = transform->fwd();
-    const auto& up = transform->up();
-    const auto& left = transform->left();
+    const auto& transform = this->owner()->GetComponent<Transform>();
+    const auto& pos = transform.pos();
+    const auto& fwd = transform.fwd();
+    const auto& up = transform.up();
+    const auto& left = transform.left();
 
     return {
         // Near plane

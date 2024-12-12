@@ -9,31 +9,12 @@ GameObject::GameObject(const std::string& name, const std::string& tag, bool act
 	this->AddComponent<Transform>();
 }
 
-bool GameObject::operator==(const GameObject& other) const
+GameObject::GameObject(GameObject&& other) noexcept : TreeExtension(std::move(other)), _name(std::move(other._name)), _tag(std::move(other._tag)), _active(other._active), _components(std::move(other._components))
 {
-	// Compare name, tag, and active state
-	if (_name != other._name || _tag != other._tag || _active != other._active) return false;
-
-	// Compare components by checking each component type
-	if (_components.size() != other._components.size()) return false;
-
-	for (size_t i = 0; i < _components.size(); ++i) if (*_components[i] != *other._components[i]) return false;
-	return true;
-}
-
-bool GameObject::operator!=(const GameObject& other) const 
-{
-	// Compare name, tag, and active state
-	if (_name != other._name || _tag != other._tag || _active != other._active) return true;
-
-	// Compare components by checking each component type
-	if (_components.size() != other._components.size()) return true;
-
-	for (size_t i = 0; i < _components.size(); ++i) if (*_components[i] != *other._components[i]) return true;
-	return false;
+	for (auto& component : _components) component->SetOwner(this);
 }
 
 const BoundingBox& GameObject::getBoundingBox() const
 {
-	return GetComponent<Transform>()->mat() * _boundingBox;
+	return this->GetComponent<Transform>().mat() * _boundingBox;
 }

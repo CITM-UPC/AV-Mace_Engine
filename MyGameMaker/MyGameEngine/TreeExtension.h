@@ -2,7 +2,7 @@
 
 #include <list>
 #include <memory>
-#include "readOnlyView.h"
+#include <ranges>
 
 template <class T>
 class TreeExtension
@@ -10,36 +10,47 @@ class TreeExtension
 private:
     T* _parent = nullptr;
     std::list<std::shared_ptr<T>> _children;
+    std::ranges::ref_view<std::list<T>> _children_view{ _children };
 
 public:
+    TreeExtension() = default;
+    TreeExtension(const TreeExtension& other) : _children(other._children) { for (auto& child : _children) child._parent = static_cast<T*>(this); }
+    TreeExtension& operator=(const TreeExtension& other) {
+        _children = other._children;
+        for (auto& child : _children) child._parent = static_cast<T*>(this);
+        return *this;
+    }
+    TreeExtension(TreeExtension&& other)  noexcept : _parent(other._parent), _children(std::move(other._children)) {
+        for (auto& child : _children) {
+            child._parent = static_cast<T*>(this);
+        }
+        other._parent = nullptr;
+    }
+    TreeExtension& operator=(TreeExtension&& other) noexcept {
+        _children = std::move(other._children);
+        for (auto& child : _children) child._parent = static_cast<T*>(this);
+        return *this;
+    }
+    virtual ~TreeExtension() = default;
+
+    bool isRoot() const { return !hasParent(); }
+    bool hasParent() const { return _parent != nullptr; }
     T* parent() { return _parent; }
     const T* parent() const { return _parent; }
     bool hasParent() const { return _parent != nullptr; }
-	auto& setParent(T* parent) { 
-        _parent = parent; 
-        return *static_cast<T*>(this);
-    }
+	auto& setParent(T* parent) { _parent = parent; return *static_cast<T*>(this); }
     
-    auto children() const { return readOnlyListView<std::shared_ptr<T>>(_children); }  // Devuelve vista solo lectura de punteros compartidos
-	auto& children() { return _children; }
-
-    auto& addChild(const std::shared_ptr<T>& child) {
-        child->setParent(static_cast<T*>(this));
-        _children.push_back(child); 
-        return child;
-    }
+    const auto& children() const { return _children; }
+    auto& children() { return _children_view; }
 
     template <typename ...Args>
     auto& emplaceChild(Args&&... args) {
-        auto child = std::make_shared<T>(std::forward<Args>(args)...);
-        child->setParent(static_cast<T*>(this));
-        _children.push_back(child);
-        return *child;
+        auto& child = _children.emplace_back(std::forward<Args>(args)...);
+        child._parent = static_cast<T*>(this);
+        return child;
     }
 
-    void removeChild(const std::shared_ptr<T>& child) {
-        _children.remove(child);
-    }
+    void removeChild(const T& child) { return _children.remove(std::forward(child)); }
 
     // Get shared pointer to this object from a child's list
     std::shared_ptr<T> getSharedFromChildren(T* ptr) {
