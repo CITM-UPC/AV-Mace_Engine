@@ -83,7 +83,7 @@ bool PanelMenu::Draw()
             if (ImGui::MenuItem("Duplicate", "Ctrl+D", nullptr, false)) {
                 // Action for "Undo" item
             }
-            if (ImGui::MenuItem("Delete", "Supr", nullptr, MyGUI::Instance().hierarchy().GetState())) {
+            if (ImGui::MenuItem("Delete", "Supr", nullptr, MyGUI::Instance().hierarchy().selectedGameObject())) {
 				MyGUI::Instance().hierarchy().selectedGameObject()->Delete();
             }
             ImGui::Separator();
