@@ -60,9 +60,14 @@ public:
 		_active = false;
 		//for (auto& component : _components); //delete component;
 		//_components.clear();
-		for (auto& child : children()) child->Delete();
+		for (auto& child : children()) {
+			child->Delete();
+			child = nullptr;
+		}
 		children().clear();
-		unparent();
+		if (this->hasParent() && !parent()->hasParent()) {
+			unparent();
+		}
 	}
 
 	bool operator==(const GameObject& other) const;
