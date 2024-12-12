@@ -19,6 +19,7 @@
 #include "Frustum.h"
 #include "Ray.h"
 
+
 //camera movement variables
 bool rightMouse = false;
 int lastMouseX = -1;
@@ -37,6 +38,9 @@ float verticalAngle = 0.0f;
 float fovModifier = 0;
 float zoomValue = 0;
 bool isZooming = false;
+
+bool fustrum = false;
+bool showconsle = false;
 
 void Scene::Start()
 {
@@ -63,6 +67,16 @@ void Scene::Update(double& dT)
 	}
 	else {
 		camera()->GetComponent<Camera>()->speed() = 10.0f;
+	}
+
+	//enale fusion culling
+	if (Engine::Instance().input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN) {
+		fustrum = !fustrum;
+		showconsle = true;
+	}
+
+	if (showconsle) {
+		std::system("cls");
 	}
 
 	//camera rotation
@@ -284,14 +298,25 @@ bool isAABBInsideFrustum(const BoundingBox& aabb, const std::list<Plane>& planes
 void Scene::Draw(GameObject* sceneroot)
 {
 	std::list<Plane> frustumPlanes = camera()->GetComponent<Camera>()->frustumPlanes();
+
 	for (auto& child : sceneroot->children())
 	{
 		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
+			if (fustrum) {
+				BoundingBox aabb = child->getBoundingBox().toAABB(child->GetComponent<Transform>()->mat());
 
-			BoundingBox aabb = child->getBoundingBox().toAABB(child->GetComponent<Transform>()->mat());
-
-			if (isAABBInsideFrustum(aabb, frustumPlanes)) {
-				child->GetComponent<Mesh>()->drawModel(); // Dibujar solo si pasa el culling
+				if (isAABBInsideFrustum(aabb, frustumPlanes)) {
+					child->GetComponent<Mesh>()->drawModel(); // Dibujar solo si pasa el culling
+					if (showconsle)
+					cout << child->name() << " inside frustum, ";
+				}
+				else {
+					if (showconsle)
+					cout << child->name() << " outside frustum, ";
+				}
+			}
+			else {
+				child->GetComponent<Mesh>()->drawModel();
 			}
 		}
 
@@ -299,6 +324,7 @@ void Scene::Draw(GameObject* sceneroot)
 	}
 
 	drawDebugInfoForGraphicObject(*sceneroot);
+	showconsle = false;
 }
 
 void Scene::loadGameObjectByPath(const std::string& path)
