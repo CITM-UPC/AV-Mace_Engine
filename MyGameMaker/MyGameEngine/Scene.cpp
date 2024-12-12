@@ -240,6 +240,7 @@ void Scene::Update(double& dT)
 			LOG(LogType::LOG_INFO, "No object selected.");
 		}
 	}
+
 }
 
 void Scene::PostUpdate()
@@ -257,19 +258,47 @@ void Scene::CleanUp()
 
 void Scene::OnSceneChange() {}
 
-void Scene::Draw(GameObject* root)
+bool isAABBInsideFrustum(const BoundingBox& aabb, const std::list<Plane>& planes) {
+	for (const auto& plane : planes) {
+		// Calcula los puntos más cercano y lejano al plano
+		vec3 farthest = vec3(
+			plane.normal.v.x > 0 ? aabb.max.x : aabb.min.x,
+			plane.normal.v.y > 0 ? aabb.max.y : aabb.min.y,
+			plane.normal.v.z > 0 ? aabb.max.z : aabb.min.z
+		);
+
+		vec3 nearest = vec3(
+			plane.normal.v.x > 0 ? aabb.min.x : aabb.max.x,
+			plane.normal.v.y > 0 ? aabb.min.y : aabb.max.y,
+			plane.normal.v.z > 0 ? aabb.min.z : aabb.max.z
+		);
+
+		// Revisar si el AABB está fuera del frustum
+		if (glm::dot(plane.normal.v, farthest - plane.origin.p) < 0) {
+			return false; // El AABB está fuera del frustum
+		}
+	}
+	return true; // Está dentro del frustum
+}
+
+void Scene::Draw(GameObject* sceneroot)
 {
-	Frustum frustum;
-	for (auto& child : root->children())
+	std::list<Plane> frustumPlanes = camera()->GetComponent<Camera>()->frustumPlanes();
+	for (auto& child : sceneroot->children())
 	{
 		if (child.get()->isActive() && child->HasComponent<Mesh>() && child->GetComponent<Mesh>()->isActive()) {
-			child->GetComponent<Mesh>()->drawModel();
+
+			BoundingBox aabb = child->getBoundingBox().toAABB(child->GetComponent<Transform>()->mat());
+
+			if (isAABBInsideFrustum(aabb, frustumPlanes)) {
+				child->GetComponent<Mesh>()->drawModel(); // Dibujar solo si pasa el culling
+			}
 		}
 
 		if (!child->children().empty()) Draw(child.get());
 	}
 
-	drawDebugInfoForGraphicObject(*root);
+	drawDebugInfoForGraphicObject(*sceneroot);
 }
 
 void Scene::loadGameObjectByPath(const std::string& path)

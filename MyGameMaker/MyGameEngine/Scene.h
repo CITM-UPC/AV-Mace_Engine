@@ -29,7 +29,7 @@ public:
 	void PostUpdate();
 	void CleanUp();
 	void OnSceneChange();
-	void Draw(GameObject* root);
+	void Draw(GameObject* sceneroot);
 
 	void loadGameObjectByPath(const std::string& path);
 	void loadTextureByPath(const std::string& path);

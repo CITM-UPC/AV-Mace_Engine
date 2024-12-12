@@ -28,6 +28,23 @@ struct BoundingBox {
 	BoundingBox operator+(const BoundingBox& other) const;
 
 	bool isEmpty() const { return min == max; }
+
+	BoundingBox(const vec3& min, const vec3& max) : min(min), max(max) {};
+
+	// Genera un AABB transformado
+	BoundingBox toAABB(const glm::mat4& transform) const {
+		auto verts = vertices();
+		vec3 new_min = vec3(std::numeric_limits<float>::max());
+		vec3 new_max = vec3(std::numeric_limits<float>::lowest());
+
+		for (const vec3& vert : verts) {
+			vec3 transformed = vec3(transform * glm::vec4(vert, 1.0f)); // Transformar vértice
+			new_min = glm::min(new_min, transformed); // Comparar mínimos
+			new_max = glm::max(new_max, transformed); // Comparar máximos
+		}
+
+		return BoundingBox{ new_min, new_max };
+	}
 };
 
 

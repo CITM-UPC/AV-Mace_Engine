@@ -13,20 +13,33 @@ glm::dmat4 Camera::view() const {
 
 std::list<Plane> Camera::frustumPlanes() const
 {
-	const auto h_fov = _fov;
-	const auto v_fov = _fov / _aspect;
-	return {
-		//near
-		Plane(this->getOwner()->GetComponent<Transform>()->fwd(), this->getOwner()->GetComponent<Transform>()->pos() + this->getOwner()->GetComponent<Transform>()->fwd() * zNear),
-		//far
-		Plane(-this->getOwner()->GetComponent<Transform>()->fwd(), this->getOwner()->GetComponent<Transform>()->pos() + this->getOwner()->GetComponent<Transform>()->fwd() * zFar),
-		//left
-		Plane(glm::rotate(-this->getOwner()->GetComponent<Transform>()->left(), h_fov, this->getOwner()->GetComponent<Transform>()->up()), this->getOwner()->GetComponent<Transform>()->pos()),
-		////right
-		Plane(glm::rotate(this->getOwner()->GetComponent<Transform>()->left(), -h_fov, this->getOwner()->GetComponent<Transform>()->up()), this->getOwner()->GetComponent<Transform>()->pos()),
-		////top
-		Plane(glm::rotate(-this->getOwner()->GetComponent<Transform>()->up(), -v_fov, this->getOwner()->GetComponent<Transform>()->left()), this->getOwner()->GetComponent<Transform>()->pos()),
-		////bottom
-		Plane(glm::rotate(this->getOwner()->GetComponent<Transform>()->up(), v_fov, this->getOwner()->GetComponent<Transform>()->left()), this->getOwner()->GetComponent<Transform>()->pos())
-	};
+    const auto h_fov = _fov;  // FOV horizontal
+    const auto v_fov = 2.0 * glm::atan(glm::tan(glm::radians(h_fov) / 2.0) / _aspect);  // Calcular FOV vertical basado en el horizontal y el aspect ratio
+
+    // Posición y orientación de la cámara
+    const auto& transform = this->getOwner()->GetComponent<Transform>();
+    const auto& pos = transform->pos();
+    const auto& fwd = transform->fwd();
+    const auto& up = transform->up();
+    const auto& left = transform->left();
+
+    return {
+        // Near plane
+        Plane(fwd, pos + fwd * zNear),
+
+        // Far plane
+        Plane(-fwd, pos + fwd * zFar),
+
+        // Left plane (calculado usando FOV y la relación de aspecto)
+        Plane(glm::normalize(glm::cross(up, fwd)), pos),
+
+        // Right plane (calculado usando FOV y la relación de aspecto)
+        Plane(glm::normalize(glm::cross(fwd, up)), pos),
+
+        // Top plane
+        Plane(glm::normalize(glm::cross(fwd, left)), pos),
+
+        // Bottom plane
+        Plane(glm::normalize(glm::cross(left, fwd)), pos)
+    };
 }

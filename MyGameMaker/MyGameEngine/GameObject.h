@@ -71,6 +71,7 @@ public:
 	// Métodos para la Bounding Box
 	const BoundingBox& getBoundingBox() const;
 	void setBoundingBox(const BoundingBox& bbox) { _boundingBox = bbox; }
+	BoundingBox& BoundingBox() { return _boundingBox; }
 
 protected:
 	virtual void Start() {}
