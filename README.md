@@ -44,12 +44,12 @@ Game engine using SDL2, glew, assimp, imgui, glm and devil, made by the Group 4 
 - Dropping a .png or .dds with a selected gameobject will apply the texture or replace the old one. <-- Important
 - We apply all the assimp transforms to the actual object and get rid of unnecessary groups that clouded the hierarchy.
 - Components branch has a working Components interface:
-- - Components are unique pointers
-- - Components use polymorph list
-- - Updated interface
-- - Parent and owner are pointers
-- - All is passed using a reference
-- - However, because we finished doing this components part of the project too late before the delivery, we didn't merge it with main and left it aside to merge later. It works as intended.
+  - Components are unique pointers
+  - Components use polymorph list
+  - Updated interface
+  - Parent and owner are pointers
+  - All is passed using a reference
+  - However, because we finished doing this components part of the project too late before the delivery, we didn't merge it with main and left it aside to merge later. It works as intended.
 - We have custom files that in theory save correctly but can't load properly yet.
 - When loading the editor, depending on the parentbox, the camera places itself so all the object can be viewed.
 
