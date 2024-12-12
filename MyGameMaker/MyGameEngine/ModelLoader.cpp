@@ -460,7 +460,6 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 	glm::mat4 accumulatedTransform = glm::mat4(1.0f),
 	std::shared_ptr<GameObject> root = nullptr
 ) {
-	cout << node.mName.data << endl;
 
 	// Check if the node has the suffix indicating it is an Assimp transformation node
 	if (hasSubstring(node.mName.data, "$AssimpFbx$")) {
@@ -480,6 +479,7 @@ std::shared_ptr<GameObject> graphicObjectFromNode(
 
 	// If the current node is not a transformation node, create a GameObject
 	if (!hasSubstring(node.mName.data, "$AssimpFbx$")) {
+		cout << node.mName.data << endl;
 		std::shared_ptr<GameObject> obj = std::make_shared<GameObject>(node.mName.data);
 
 		// Apply the accumulated transformation and set the transform
