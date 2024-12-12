@@ -271,7 +271,7 @@ void PanelMenu::showVertexNormals(auto& child, bool showVertex)
 void PanelMenu::showFaceNormals(auto& child, bool showFace)
 {
     if (child->HasComponent<Mesh>()) {
-        child->GetComponent<Mesh>()->setDebugNormals(showFace);
+        child->GetComponent<Mesh>()->setDebugFaceNormals(showFace);
     }
 
     if (!child->children().empty()) {
