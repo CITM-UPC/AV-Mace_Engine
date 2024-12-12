@@ -7,6 +7,7 @@
 #include "MyGameEngine/Scene.h"
 #include "MyGameEngine/GameObject.h"
 #include "MyGameEngine/Mesh.h"
+#include "MyGameEngine/Log.h"
 
 #include "PanelConsole.h"
 #include "PanelInspector.h"
@@ -248,6 +249,20 @@ bool PanelMenu::Draw()
             }
             ImGui::EndMenu();
         }
+
+        // Run Menu
+		if (ImGui::BeginMenu("Run")) {
+			if (ImGui::MenuItem("Play", "Ctrl+P", nullptr)) {
+                LOG(LogType::LOG_INFO, "Play button pressed");
+			}
+			if (ImGui::MenuItem("Pause", "Ctrl+Shift+P", nullptr)) {
+                LOG(LogType::LOG_INFO, "Pause button pressed");
+			}
+			if (ImGui::MenuItem("Step", "Ctrl+Alt+P", nullptr)) {
+				LOG(LogType::LOG_INFO, "Step button pressed");
+			}
+			ImGui::EndMenu();
+		}
 
         ImGui::EndMainMenuBar();
     }
