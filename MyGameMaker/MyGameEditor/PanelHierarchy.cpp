@@ -51,7 +51,6 @@ bool PanelHierarchy::Draw()
    // Create GameObjects Popup
    if (ImGui::BeginPopup("CreateGameObjectPopup")) 
    {
-       LOG(LogType::LOG_INFO, "Popup Called");
 	   if (ImGui::MenuItem("Cut", nullptr, nullptr, _selectedGameObject != nullptr)) 
 	   {
 	   }
@@ -75,6 +74,7 @@ bool PanelHierarchy::Draw()
 	   if (ImGui::MenuItem("Delete", nullptr, nullptr, _selectedGameObject != nullptr)) 
 	   {
 		   _selectedGameObject->Delete();
+		   _selectedGameObject = nullptr;
 	   }
 	   ImGui::Separator();
 	   if (ImGui::MenuItem("Select Children", nullptr, nullptr, _selectedGameObject != nullptr)) 
