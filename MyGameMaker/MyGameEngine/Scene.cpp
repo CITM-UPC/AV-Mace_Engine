@@ -308,11 +308,11 @@ void Scene::Draw(GameObject* sceneroot)
 				if (isAABBInsideFrustum(aabb, frustumPlanes)) {
 					child->GetComponent<Mesh>()->drawModel(); // Dibujar solo si pasa el culling
 					if (showconsle)
-					cout << child->name() << " inside frustum, ";
+						cout << child->name() << " inside frustum, " << endl;
 				}
 				else {
 					if (showconsle)
-					cout << child->name() << " outside frustum, ";
+						cout << child->name() << " outside frustum, " << endl;
 				}
 			}
 			else {
