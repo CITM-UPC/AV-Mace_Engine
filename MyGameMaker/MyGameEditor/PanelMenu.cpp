@@ -188,33 +188,33 @@ bool PanelMenu::Draw()
             if (ImGui::BeginMenu("3D Objects..."))
             {
                 if (ImGui::MenuItem("Create Camera", nullptr, nullptr)) {
-                    //Engine::Instance().scene->CreateCamera();
+                    Engine::Instance().scene->CreateCamera();
                 }
                 ImGui::EndMenu();
             }
 			
             if (ImGui::BeginMenu("Draw Mode")) {
 
-                if (ImGui::MenuItem("Mesh", nullptr, currentDrawMode == Mesh)) {
-                    currentDrawMode = Mesh;
+                if (ImGui::MenuItem("Mesh", nullptr, currentDrawMode == DrawMode::MESH)) {
+                    currentDrawMode = DrawMode::MESH;
                 }
-                if (ImGui::MenuItem("Wireframe", nullptr, currentDrawMode == Wireframe)) {
-                    currentDrawMode = Wireframe;
+                if (ImGui::MenuItem("Wireframe", nullptr, currentDrawMode == DrawMode::WIREFRAME)) {
+                    currentDrawMode = DrawMode::WIREFRAME;
                 }
-                if (ImGui::MenuItem("Vertexs", nullptr, currentDrawMode == Vertexs)) {
-                    currentDrawMode = Vertexs;
+                if (ImGui::MenuItem("Vertexs", nullptr, currentDrawMode == DrawMode::VERTEX)) {
+                    currentDrawMode = DrawMode::VERTEX;
                 }
                 ImGui::Separator();
                 if (ImGui::Checkbox("Vertex Normals", &showPerTriangleNormals)) {
                     for (auto& child : Engine::Instance().scene->root()->children())
-                    {
-                        //child->GetComponent<Mesh>()->setDebugNormals(showPerTriangleNormals);
-                    }
+					{
+						showVertexNormals(child, showPerTriangleNormals);
+					}
                 }
                 if (ImGui::Checkbox("Face Normals", &showPerFaceNormals)) {
                     for (auto& child : Engine::Instance().scene->root()->children())
                     {
-                        //child->GetComponent<Mesh>()->setDebugFaceNormals(showPerFaceNormals);
+						showFaceNormals(child, showPerFaceNormals);
                     }
                 }
                 ImGui::EndMenu();
@@ -253,4 +253,30 @@ bool PanelMenu::Draw()
     }
 
 	return true;
+}
+
+void PanelMenu::showVertexNormals(auto& child, bool showVertex)
+{
+	if (child->HasComponent<Mesh>()) {
+		child->GetComponent<Mesh>()->setDebugNormals(showVertex);
+	}
+
+	if (!child->children().empty()) {
+        for (auto& grandchild : child->children()) {
+            showVertexNormals(grandchild, showVertex);
+        }
+	}
+}
+
+void PanelMenu::showFaceNormals(auto& child, bool showFace)
+{
+    if (child->HasComponent<Mesh>()) {
+        child->GetComponent<Mesh>()->setDebugNormals(showFace);
+    }
+
+    if (!child->children().empty()) {
+        for (auto& grandchild : child->children()) {
+            showFaceNormals(grandchild, showFace);
+        }
+    }
 }

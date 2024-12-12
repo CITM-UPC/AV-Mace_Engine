@@ -44,6 +44,7 @@ public:
 	void CreateCylinder();
 	void CreateCone();
 	void CreateTorus();
+	void CreateCamera();
 	Ray CalculatePickingRay(int mouseX, int mouseY, Camera* camera, int screenWidth, int screenHeight);
 	bool IntersectRayBox(const Ray& ray, const BoundingBox& box, float& t);
 	std::shared_ptr<GameObject>& CheckIntersectionRecursive(const Ray& ray, std::shared_ptr<GameObject> object, float& closestT, std::shared_ptr<GameObject>& closestObject);

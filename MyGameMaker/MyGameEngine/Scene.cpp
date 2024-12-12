@@ -432,6 +432,20 @@ void Scene::CreateTorus()
 	else selectedGameObject->addChild(go);
 }
 
+void Scene::CreateCamera()
+{
+	std::shared_ptr<GameObject> camera = std::make_shared<GameObject>("Camera", "Camera");
+	camera->GetComponent<Transform>()->pos() = vec3(0, 0, 0);
+	camera->GetComponent<Transform>()->updateGlobalMatrix();
+	camera->AddComponent<Camera>();
+	camera->GetComponent<Camera>()->fov() = glm::radians(60.0f);
+	camera->GetComponent<Camera>()->near() = 0.1f;
+	camera->GetComponent<Camera>()->far() = 1000.0f;
+
+	if (selectedGameObject == nullptr) root()->addChild(camera);
+	else selectedGameObject->addChild(camera);
+}
+
 Ray Scene::CalculatePickingRay(int mouseX, int mouseY, Camera* camera, int screenWidth, int screenHeight) {
 	glm::vec4 viewport(WINDOW_WIDTH * 0.15, 200, screenWidth, screenHeight);
 

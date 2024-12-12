@@ -70,6 +70,7 @@ bool PanelHierarchy::Draw()
 	   }
 	   if (ImGui::MenuItem("Duplicate", nullptr, nullptr, _selectedGameObject != nullptr)) 
 	   {
+		   Engine::Instance().scene->CreateGameObject(_selectedGameObject->name() + "_Copy");
 	   }
 	   if (ImGui::MenuItem("Delete", nullptr, nullptr, _selectedGameObject != nullptr)) 
 	   {

@@ -5,9 +5,9 @@
 #include "Panel.h"
 
 enum DrawMode {
-	Mesh,
-	Wireframe,
-	Vertexs
+	MESH,
+	WIREFRAME,
+	VERTEX
 };
 
 class PanelMenu : public Panel
@@ -19,9 +19,12 @@ public:
 
 	bool Draw() override;
 
+	void showVertexNormals(auto& child, bool showVertex);
+	void showFaceNormals(auto& child, bool showFace);
+
 private:
 	int drawMode = 0;
-	DrawMode currentDrawMode = Mesh;
+	DrawMode currentDrawMode = DrawMode::MESH;
 
 	bool showPerTriangleNormals = false;
 	bool showPerFaceNormals = false;
