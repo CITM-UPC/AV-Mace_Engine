@@ -37,6 +37,7 @@ void Renderer::Start() const
     GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glClearColor(0.5, 0.5, 0.5, 1.0));
 	GLCall(glEnable(GL_BLEND));
+    glEnable(GL_CULL_FACE);
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     LOG(LogType::LOG_APPINFO, "Vendor: %s", (char*)glGetString(GL_VENDOR));
